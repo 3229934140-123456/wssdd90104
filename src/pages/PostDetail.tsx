@@ -1,14 +1,22 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, MessageSquare, Building2, BookOpen, Star, Image, ThumbsUp, ThumbsDown, Crosshair } from 'lucide-react'
+import { ArrowLeft, MessageSquare, Building2, BookOpen, Star, Image, ThumbsUp, ThumbsDown, Crosshair, ShieldAlert } from 'lucide-react'
 import { useAppStore } from '@/store/useStore'
 import TagBadge from '@/components/TagBadge'
-import { SOURCE_MAP } from '@/data/mock'
+import { SOURCE_MAP, CONFIDENCE_CONFIG } from '@/data/mock'
 
 const sourceIcons: Record<string, React.ReactNode> = {
   tieba: <MessageSquare size={14} />,
   cityforum: <Building2 size={14} />,
   xiaohongshu: <BookOpen size={14} />,
   dianping: <Star size={14} />,
+}
+
+const MATCH_TYPE_LABEL: Record<string, string> = {
+  storeName: '门店名',
+  alias: '别名',
+  boss: '老板称呼',
+  signature: '招牌',
+  service: '服务词',
 }
 
 export default function PostDetail() {
@@ -28,6 +36,7 @@ export default function PostDetail() {
 
   const agreeReplies = post.replies.filter((r) => r.isAgree)
   const disagreeReplies = post.replies.filter((r) => !r.isAgree)
+  const confConfig = CONFIDENCE_CONFIG[post.confidence]
 
   return (
     <div className="animate-slide-in-right">
@@ -50,7 +59,14 @@ export default function PostDetail() {
             {post.tags.map((tag) => (
               <TagBadge key={tag} tag={tag} size="md" />
             ))}
-            <span className="ml-auto text-warm-400 text-xs">
+            <span
+              className="text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1 ml-auto"
+              style={{ color: confConfig.color, backgroundColor: confConfig.bg }}
+            >
+              {post.confidence === 'low' && <ShieldAlert size={10} />}
+              {confConfig.label}
+            </span>
+            <span className="text-warm-400 text-xs">
               {new Date(post.publishedAt).toLocaleDateString('zh-CN', {
                 month: 'long',
                 day: 'numeric',
@@ -68,13 +84,22 @@ export default function PostDetail() {
         {post.matchedKeywords.length > 0 && (
           <div className="opacity-0 animate-fade-in-up stagger-1 flex items-center gap-1.5 flex-wrap bg-amber-50/50 rounded-xl px-3 py-2 border border-amber-100/40">
             <Crosshair size={12} className="text-amber-primary shrink-0" />
-            <span className="text-amber-700 text-xs font-medium shrink-0">匹配词：</span>
-            {post.matchedKeywords.map((kw) => (
+            <span className="text-amber-700 text-xs font-medium shrink-0">命中：</span>
+            {post.matchedKeywords.map((m) => (
               <span
-                key={kw}
-                className="text-xs px-2 py-0.5 rounded-full bg-amber-primary/10 text-amber-primary font-medium"
+                key={m.word}
+                className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                  m.type === 'service'
+                    ? 'bg-warm-200/40 text-warm-500'
+                    : m.type === 'storeName' || m.type === 'alias'
+                    ? 'bg-amber-primary/12 text-amber-primary'
+                    : m.type === 'boss'
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'bg-green-50 text-green-600'
+                }`}
               >
-                {kw}
+                {m.word}
+                <span className="ml-0.5 opacity-60">·{MATCH_TYPE_LABEL[m.type]}</span>
               </span>
             ))}
           </div>

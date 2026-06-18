@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom'
-import { MessageSquare, Building2, BookOpen, Star, Image, ChevronRight, Crosshair } from 'lucide-react'
+import { MessageSquare, Building2, BookOpen, Star, Image, ChevronRight, Crosshair, ShieldAlert } from 'lucide-react'
 import type { Post } from '@/types'
 import TagBadge from '@/components/TagBadge'
-import { SOURCE_MAP } from '@/data/mock'
+import { SOURCE_MAP, CONFIDENCE_CONFIG } from '@/data/mock'
 
 const sourceIcons: Record<string, React.ReactNode> = {
   tieba: <MessageSquare size={12} />,
@@ -23,6 +23,14 @@ function formatTime(dateStr: string) {
   return `${date.getMonth() + 1}月${date.getDate()}日`
 }
 
+const MATCH_TYPE_LABEL: Record<string, string> = {
+  storeName: '门店名',
+  alias: '别名',
+  boss: '老板称呼',
+  signature: '招牌',
+  service: '服务词',
+}
+
 interface PostCardProps {
   post: Post
   index: number
@@ -30,21 +38,31 @@ interface PostCardProps {
 
 export default function PostCard({ post, index }: PostCardProps) {
   const navigate = useNavigate()
+  const confConfig = CONFIDENCE_CONFIG[post.confidence]
 
   return (
     <div
-      className={`opacity-0 animate-fade-in-up stagger-${Math.min(index + 1, 6)} bg-white rounded-2xl p-4 shadow-sm border border-warm-200/50 cursor-pointer active:scale-[0.98] transition-transform duration-150`}
+      className={`opacity-0 animate-fade-in-up stagger-${Math.min(index + 1, 6)} bg-white rounded-2xl p-4 shadow-sm border border-warm-200/50 cursor-pointer active:scale-[0.98] transition-transform duration-150 ${
+        post.confidence === 'low' ? 'opacity-80 border-dashed' : ''
+      }`}
       onClick={() => navigate(`/mentions/${post.id}`)}
     >
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-2 flex-wrap">
         <span className="flex items-center gap-1 text-warm-500 text-xs">
           {sourceIcons[post.source]}
           {SOURCE_MAP[post.source]?.label}
         </span>
         <span className="text-warm-400 text-xs">·</span>
         <span className="text-warm-400 text-xs">{formatTime(post.publishedAt)}</span>
+        <span
+          className="text-[9px] px-1.5 py-0.5 rounded-full font-medium flex items-center gap-0.5 ml-auto"
+          style={{ color: confConfig.color, backgroundColor: confConfig.bg }}
+        >
+          {post.confidence === 'low' && <ShieldAlert size={9} />}
+          {confConfig.label}
+        </span>
         {post.hasImage && (
-          <span className="ml-auto flex items-center gap-0.5 text-warm-400 text-xs">
+          <span className="flex items-center gap-0.5 text-warm-400 text-xs">
             <Image size={12} />
             {post.imageCount}
           </span>
@@ -71,12 +89,22 @@ export default function PostCard({ post, index }: PostCardProps) {
       {post.matchedKeywords.length > 0 && (
         <div className="mt-2.5 pt-2.5 border-t border-warm-100 flex items-center gap-1.5 flex-wrap">
           <Crosshair size={10} className="text-amber-primary shrink-0" />
-          {post.matchedKeywords.map((kw) => (
+          {post.matchedKeywords.map((m) => (
             <span
-              key={kw}
-              className="text-[10px] px-1.5 py-0.5 rounded bg-amber-primary/8 text-amber-primary/80 font-medium"
+              key={m.word}
+              title={`匹配到：${MATCH_TYPE_LABEL[m.type]}`}
+              className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                m.type === 'service'
+                  ? 'bg-warm-200/40 text-warm-500'
+                  : m.type === 'storeName' || m.type === 'alias'
+                  ? 'bg-amber-primary/12 text-amber-primary'
+                  : m.type === 'boss'
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'bg-green-50 text-green-600'
+              }`}
             >
-              {kw}
+              {m.word}
+              <span className="ml-0.5 opacity-60">·{MATCH_TYPE_LABEL[m.type]}</span>
             </span>
           ))}
         </div>

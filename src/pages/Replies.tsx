@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Globe, Shield, Copy, Check, ChevronRight, Pencil, User, ClipboardCheck } from 'lucide-react'
+import {
+  Globe, Shield, Copy, Check, ChevronRight, Pencil, User,
+  ClipboardCheck, History, CheckCircle, RotateCcw, RefreshCw
+} from 'lucide-react'
 import { useAppStore } from '@/store/useStore'
 import TagBadge from '@/components/TagBadge'
 import { STRATEGY_CONFIG, RISK_CONFIG } from '@/data/mock'
@@ -8,16 +11,28 @@ import type { FixStatus } from '@/types'
 
 export default function Replies() {
   const navigate = useNavigate()
-  const { reminders, posts, copyDraft, updateDraft, updateInternalFix } = useAppStore()
+  const { reminders, posts, copyDraft, updateDraft, updateInternalFix, markReminderCompleted, resetReminders } = useAppStore()
   const [activeTab, setActiveTab] = useState<'public' | 'internal'>('public')
+  const [statusFilter, setStatusFilter] = useState<'pending' | 'done'>('pending')
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [editingDraftId, setEditingDraftId] = useState<string | null>(null)
   const [editDraftText, setEditDraftText] = useState('')
   const [editingFixId, setEditingFixId] = useState<string | null>(null)
+  const [showHistoryId, setShowHistoryId] = useState<string | null>(null)
 
   const publicReminders = reminders.filter((r) => r.type === 'public')
   const internalReminders = reminders.filter((r) => r.type === 'internal')
-  const currentReminders = activeTab === 'public' ? publicReminders : internalReminders
+  const currentReminders = (activeTab === 'public' ? publicReminders : internalReminders)
+  const filtered = currentReminders.filter((r) => {
+    if (statusFilter === 'done') return r.completed
+    if (r.type === 'internal') {
+      return !r.completed && r.internalFix?.status !== 'done'
+    }
+    return !r.completed
+  })
+
+  const doneCount = currentReminders.filter((r) => r.completed).length
+  const pendingCount = currentReminders.length - doneCount
 
   const handleCopy = (id: string) => {
     copyDraft(id)
@@ -41,9 +56,15 @@ export default function Replies() {
     done: { label: '已完成', color: '#38A169', bg: '#F0FFF4' },
   }
 
+  const isDone = (reminder: typeof reminders[number]) => {
+    if (reminder.completed) return true
+    if (reminder.type === 'internal' && reminder.internalFix?.status === 'done') return true
+    return false
+  }
+
   return (
     <div className="pb-4">
-      <div className="px-4 mb-4">
+      <div className="px-4 mb-3">
         <div className="flex bg-warm-200/50 rounded-2xl p-1">
           <button
             onClick={() => setActiveTab('public')}
@@ -80,18 +101,71 @@ export default function Replies() {
         </div>
       </div>
 
+      <div className="px-4 mb-3 flex items-center justify-between">
+        <div className="flex bg-warm-100 rounded-xl p-0.5">
+          <button
+            onClick={() => setStatusFilter('pending')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              statusFilter === 'pending'
+                ? 'bg-white text-warm-900 shadow-sm'
+                : 'text-warm-500'
+            }`}
+          >
+            待处理 {pendingCount > 0 && <span className="text-amber-primary">({pendingCount})</span>}
+          </button>
+          <button
+            onClick={() => setStatusFilter('done')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              statusFilter === 'done'
+                ? 'bg-white text-warm-900 shadow-sm'
+                : 'text-warm-500'
+            }`}
+          >
+            已完成 {doneCount > 0 && <span className="text-tag-good">({doneCount})</span>}
+          </button>
+        </div>
+        <button
+          onClick={() => {
+            if (confirm('确定要重置所有回复记录吗？草稿和整改信息将被清除。')) {
+              resetReminders()
+            }
+          }}
+          className="flex items-center gap-1 text-[10px] text-warm-400 hover:text-warm-600 transition-colors"
+        >
+          <RefreshCw size={10} />
+          重置
+        </button>
+      </div>
+
       <div className="px-4 space-y-3">
-        {currentReminders.map((reminder, i) => {
+        {filtered.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="w-14 h-14 rounded-full bg-warm-100 flex items-center justify-center mb-3">
+              <CheckCircle size={28} className="text-tag-good" />
+            </div>
+            <p className="text-warm-600 text-sm font-medium">
+              {statusFilter === 'done' ? '暂无已完成的记录' : '目前没有待处理的提醒'}
+            </p>
+            <p className="text-warm-400 text-xs mt-1">
+              {statusFilter === 'done' ? '完成的任务会显示在这里' : '有新提醒时会第一时间通知你'}
+            </p>
+          </div>
+        )}
+
+        {filtered.map((reminder, i) => {
           const post = posts.find((p) => p.id === reminder.postId)
           if (!post) return null
 
           const strategyConfig = STRATEGY_CONFIG[reminder.strategy] || STRATEGY_CONFIG['观察']
           const riskConfig = RISK_CONFIG[reminder.riskLevel] || RISK_CONFIG['medium']
+          const done = isDone(reminder)
 
           return (
             <div
               key={reminder.id}
-              className={`opacity-0 animate-fade-in-up stagger-${Math.min(i + 1, 6)} bg-white rounded-2xl overflow-hidden shadow-sm border border-warm-200/50`}
+              className={`opacity-0 animate-fade-in-up stagger-${Math.min(i + 1, 6)} bg-white rounded-2xl overflow-hidden shadow-sm border border-warm-200/50 ${
+                done ? 'opacity-70' : ''
+              }`}
             >
               <div
                 className="px-4 py-3 cursor-pointer active:bg-warm-50 transition-colors"
@@ -154,8 +228,21 @@ export default function Replies() {
                   ) : (
                     <div className="p-3">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-amber-700 text-xs font-medium">推荐回复草稿</span>
+                        <span className="text-amber-700 text-xs font-medium">
+                          {reminder.draftHistory && reminder.draftHistory.length > 1
+                            ? `回复草稿 (v${reminder.draftHistory.length})`
+                            : '推荐回复草稿'}
+                        </span>
                         <div className="flex items-center gap-2">
+                          {reminder.draftHistory && reminder.draftHistory.length > 1 && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setShowHistoryId(showHistoryId === reminder.id ? null : reminder.id) }}
+                              className="flex items-center gap-0.5 text-xs text-amber-primary font-medium active:scale-95 transition-transform"
+                            >
+                              <History size={10} />
+                              历史
+                            </button>
+                          )}
                           <button
                             onClick={(e) => { e.stopPropagation(); startEditDraft(reminder.id, reminder.draft || '') }}
                             className="flex items-center gap-0.5 text-xs text-amber-primary font-medium active:scale-95 transition-transform"
@@ -176,6 +263,22 @@ export default function Replies() {
                         </div>
                       </div>
                       <p className="text-amber-800 text-xs leading-relaxed">{reminder.draft}</p>
+
+                      {showHistoryId === reminder.id && reminder.draftHistory && (
+                        <div className="mt-3 pt-3 border-t border-amber-100/60 space-y-2 max-h-36 overflow-y-auto scrollbar-hide">
+                          {[...reminder.draftHistory].reverse().map((v) => (
+                            <div key={v.version} className="bg-white/60 rounded-lg p-2">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-[9px] text-amber-600 font-medium">版本 v{v.version}</span>
+                                <span className="text-[9px] text-warm-400">
+                                  {new Date(v.savedAt).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-amber-700 leading-relaxed line-clamp-3">{v.text}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -268,7 +371,7 @@ export default function Replies() {
                         </div>
                       )}
                       {reminder.internalFix.result && (
-                        <p className="text-warm-600 text-xs mb-1">结果：{reminder.internalFix.result}</p>
+                        <p className="text-warm-600 text-xs mb-1 line-clamp-2">结果：{reminder.internalFix.result}</p>
                       )}
                       {!reminder.internalFix.assignee && !reminder.internalFix.result && (
                         <p className="text-warm-400 text-xs">点击记录整改信息</p>
@@ -277,6 +380,36 @@ export default function Replies() {
                   )}
                 </div>
               )}
+
+              <div className="px-4 pb-3">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      markReminderCompleted(reminder.id, !done)
+                      if (!done && reminder.type === 'internal' && reminder.internalFix) {
+                        updateInternalFix(reminder.id, { status: 'done' })
+                      }
+                    }}
+                    className={`flex-1 h-9 rounded-xl flex items-center justify-center gap-1 text-xs font-medium transition-all active:scale-[0.97] ${
+                      done
+                        ? 'bg-warm-100 text-warm-500'
+                        : 'bg-tag-good/10 text-tag-good border border-tag-good/20'
+                    }`}
+                  >
+                    {done ? (
+                      <><RotateCcw size={12} />恢复待办</>
+                    ) : (
+                      <><CheckCircle size={12} />标记已完成</>
+                    )}
+                  </button>
+                </div>
+                {reminder.completedAt && done && (
+                  <p className="text-[9px] text-warm-400 text-center mt-2">
+                    完成于 {new Date(reminder.completedAt).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                )}
+              </div>
             </div>
           )
         })}

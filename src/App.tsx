@@ -5,6 +5,7 @@ import Onboarding from '@/pages/Onboarding'
 import Mentions from '@/pages/Mentions'
 import PostDetail from '@/pages/PostDetail'
 import Issues from '@/pages/Issues'
+import IssuesDetail from '@/pages/IssuesDetail'
 import Replies from '@/pages/Replies'
 import Keywords from '@/pages/Keywords'
 
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/mentions" element={<Mentions />} />
           <Route path="/mentions/:id" element={<PostDetail />} />
           <Route path="/issues" element={<Issues />} />
+          <Route path="/issues/:id" element={<IssuesDetail />} />
           <Route path="/replies" element={<Replies />} />
           <Route path="/keywords" element={<Keywords />} />
         </Route>

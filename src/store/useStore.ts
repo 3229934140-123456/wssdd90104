@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { StoreInfo, Post, IssueCluster, ReplyReminder, StoreKeywords, FixStatus } from '@/types'
-import { generateMockData } from '@/data/mock'
+import { generateMockData, saveGlobalReminders } from '@/data/mock'
 
 interface AppState {
   storeInfo: StoreInfo
@@ -15,12 +15,15 @@ interface AppState {
   setActiveTab: (tab: 'mentions' | 'issues' | 'replies') => void
   toggleIssue: (id: string) => void
   getPostById: (id: string) => Post | undefined
+  getIssueById: (id: string) => IssueCluster | undefined
   getReminderByPostId: (postId: string) => ReplyReminder | undefined
   copyDraft: (reminderId: string) => void
   updateKeywords: (keywords: StoreKeywords) => void
   updateDraft: (reminderId: string, draft: string) => void
   updateInternalFix: (reminderId: string, fix: { status?: FixStatus; assignee?: string; result?: string }) => void
+  markReminderCompleted: (reminderId: string, completed: boolean) => void
   regenerateData: () => void
+  resetReminders: () => void
 }
 
 const loadFromStorage = <T>(key: string, fallback: T): T => {
@@ -110,7 +113,7 @@ export const useAppStore = create<AppState>((set, get) => {
     },
 
     getPostById: (id) => get().posts.find((p) => p.id === id),
-
+    getIssueById: (id) => get().issues.find((i) => i.id === id),
     getReminderByPostId: (postId) => get().reminders.find((r) => r.postId === postId),
 
     copyDraft: (reminderId) => {
@@ -128,32 +131,62 @@ export const useAppStore = create<AppState>((set, get) => {
     },
 
     updateDraft: (reminderId, draft) => {
-      set({
-        reminders: get().reminders.map((r) =>
-          r.id === reminderId ? { ...r, draft } : r
-        ),
+      const reminders = get().reminders.map((r) => {
+        if (r.id !== reminderId) return r
+        const history = r.draftHistory || []
+        const newVersion = history.length + 1
+        return {
+          ...r,
+          draft,
+          draftHistory: [
+            ...history,
+            { version: newVersion, text: draft, savedAt: new Date().toISOString() },
+          ].slice(-10),
+        }
       })
+      saveGlobalReminders(reminders)
+      set({ reminders })
     },
 
     updateInternalFix: (reminderId, fix) => {
-      set({
-        reminders: get().reminders.map((r) => {
-          if (r.id !== reminderId || !r.internalFix) return r
-          return {
-            ...r,
-            internalFix: {
-              ...r.internalFix,
-              ...fix,
-              updatedAt: new Date().toISOString(),
-            },
-          }
-        }),
+      const reminders = get().reminders.map((r) => {
+        if (r.id !== reminderId || !r.internalFix) return r
+        return {
+          ...r,
+          internalFix: {
+            ...r.internalFix,
+            ...fix,
+            updatedAt: new Date().toISOString(),
+          },
+        }
       })
+      saveGlobalReminders(reminders)
+      set({ reminders })
+    },
+
+    markReminderCompleted: (reminderId, completed) => {
+      const reminders = get().reminders.map((r) => {
+        if (r.id !== reminderId) return r
+        return {
+          ...r,
+          completed,
+          completedAt: completed ? new Date().toISOString() : undefined,
+        }
+      })
+      saveGlobalReminders(reminders)
+      set({ reminders })
     },
 
     regenerateData: () => {
+      localStorage.removeItem('reply_reminders_v2')
       const data = buildMockData(get().storeInfo)
       set({ ...data, expandedIssues: new Set() })
+    },
+
+    resetReminders: () => {
+      localStorage.removeItem('reply_reminders_v2')
+      const data = buildMockData(get().storeInfo)
+      set({ reminders: data.reminders })
     },
   }
 })

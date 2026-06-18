@@ -1,4 +1,4 @@
-export type PostTag = '排队久' | '价格贵' | '态度好' | '环境差' | '味道好' | '推荐' | '差评' | '卫生问题'
+export type PostTag = '排队久' | '价格贵' | '态度好' | '环境差' | '味道好' | '推荐' | '差评' | '卫生问题' | '态度差'
 
 export type PostSource = 'tieba' | 'cityforum' | 'xiaohongshu' | 'dianping'
 
@@ -13,6 +13,13 @@ export type RiskLevel = 'high' | 'medium' | 'low'
 export type TrendDirection = 'up' | 'down' | 'stable'
 
 export type FixStatus = 'pending' | 'in_progress' | 'done'
+
+export type Confidence = 'high' | 'medium' | 'low'
+
+export interface KeywordMatch {
+  word: string
+  type: 'storeName' | 'alias' | 'boss' | 'signature' | 'service'
+}
 
 export interface StoreKeywords {
   storeAliases: string[]
@@ -50,7 +57,8 @@ export interface Post {
   replyCount: number
   replies: Reply[]
   sentiment: Sentiment
-  matchedKeywords: string[]
+  matchedKeywords: KeywordMatch[]
+  confidence: Confidence
 }
 
 export interface IssueTrend {
@@ -59,15 +67,24 @@ export interface IssueTrend {
   lastWeek: number
 }
 
+export interface DailyCount {
+  day: string
+  date: string
+  count: number
+}
+
 export interface IssueCluster {
   id: string
   category: string
   tag: PostTag
+  dimension: '排队' | '价格' | '服务' | '环境' | '产品'
   count: number
   postIds: string[]
   suggestion: string
   trend: IssueTrend
+  dailyTrend: DailyCount[]
   urgency: number
+  priorityReason: string
 }
 
 export interface InternalFix {
@@ -84,7 +101,10 @@ export interface ReplyReminder {
   strategy: ReplyStrategy
   riskLevel: RiskLevel
   recommendedAction: string
+  completed: boolean
+  completedAt?: string
   draft?: string
+  draftHistory?: { version: number; text: string; savedAt: string }[]
   fixDirection?: string
   internalFix?: InternalFix
 }

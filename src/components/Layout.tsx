@@ -12,7 +12,10 @@ export default function Layout() {
   const location = useLocation()
   const storeInfo = useAppStore((s) => s.storeInfo)
 
-  const isDetailPage = location.pathname.includes('/mentions/') || location.pathname === '/keywords'
+  const isDetailPage =
+    location.pathname.includes('/mentions/') ||
+    location.pathname.includes('/issues/') ||
+    location.pathname === '/keywords'
 
   return (
     <div className="flex flex-col h-screen max-w-app mx-auto bg-warm-100 relative overflow-hidden">
