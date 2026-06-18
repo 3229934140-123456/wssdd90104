@@ -40,7 +40,6 @@ export default function IssuesDetail() {
   const maxCount = Math.max(...issue.dailyTrend.map((d) => d.count), 1)
   const otherSameDim = allIssues.filter((i) => i.id !== issue.id && i.dimension === issue.dimension)
   const hasReminder = reminders.some((r) => issue.postIds.includes(r.postId) && r.type === 'internal')
-
   return (
     <div className="animate-slide-in-right pb-4">
       <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-warm-200/50 px-4 py-3 flex items-center gap-3">

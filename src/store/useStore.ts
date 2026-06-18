@@ -161,6 +161,9 @@ export const useAppStore = create<AppState>((set, get) => {
     updateInternalFix: (reminderId, fix) => {
       const reminders = get().reminders.map((r) => {
         if (r.id !== reminderId || !r.internalFix) return r
+        const newStatus = fix.status ?? r.internalFix.status
+        const wasDone = r.internalFix.status === 'done' || r.completed
+        const nowDone = newStatus === 'done'
         return {
           ...r,
           internalFix: {
@@ -168,6 +171,11 @@ export const useAppStore = create<AppState>((set, get) => {
             ...fix,
             updatedAt: new Date().toISOString(),
           },
+          ...(nowDone && !wasDone
+            ? { completed: true, completedAt: new Date().toISOString() }
+            : !nowDone && wasDone
+            ? { completed: false, completedAt: undefined }
+            : {}),
         }
       })
       saveGlobalReminders(reminders)
@@ -225,7 +233,7 @@ export const useAppStore = create<AppState>((set, get) => {
       if (!issue) return null
       const firstPost = get().posts.find((p) => issue.postIds.includes(p.id))
       if (!firstPost) return null
-      const existing = get().reminders.find((r) => r.postId === firstPost.id)
+      const existing = get().reminders.find((r) => r.postId === firstPost.id && r.type === 'internal')
       if (existing) return existing
 
       const daysForDeadline = issue.urgency >= 4 ? 3 : 5

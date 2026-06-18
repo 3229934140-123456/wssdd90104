@@ -147,13 +147,15 @@ const TEMPLATES: Record<string, IndustryTemplate> = {
     staff: ['洗车小哥', '前台', '师傅'],
     action: '擦车',
     customerWords: ['车主联盟', '爱车族', '精洗控', '老司机'],
+    landmarks: ['加油站旁边', '小区地下车库', '汽配城入口', '购物中心B2', '高速口下来', '汽车城对面'],
+    peakScenes: ['周末下午', '下雨之后', '下班顺路', '节假日出行前', '周六上午'],
     complaintTemplates: [
-      { title: '{n}洗车排队长态度差', content: '今天去{n}，等了40分钟，{dish}居然收80元！以前才50。最气的是洗完车门上还有水渍，找{staff}说一句，居然说就这样不满意别来。', tags: ['排队久', '价格贵', '态度差'], sentiment: 'negative', containsBoss: false, containsDish: [6] },
+      { title: '{n}洗车排队长态度差', content: '{p}去{n}，{l}那家，等了40分钟，{dish}居然收80元！以前才50。最气的是洗完车门上还有水渍，找{staff}说一句，居然说就这样不满意别来。', tags: ['排队久', '价格贵', '态度差'], sentiment: 'negative', containsBoss: false, containsDish: [6], sceneHint: 'weekend' },
       { title: '{n}精洗做的太敷衍', content: '花200做{dish}，后备箱根本没动，脚垫上还有沙子。找{boss}，说200的精洗就这水平，无语了。', tags: ['价格贵', '差评'], sentiment: 'negative', containsBoss: true, containsDish: [0] },
-      { title: '{n}排队管理混乱', content: '周六去{n}，等了一个半小时，有人后来的都先洗了。问{staff}说人家是会员，普通客户就该等？{boss}出来也不给解释。', tags: ['排队久', '态度差'], sentiment: 'negative', containsBoss: true, containsDish: [6] },
+      { title: '{n}排队管理混乱', content: '周六去{n}，在{l}那位置，等了一个半小时，有人后来的都先洗了。问{staff}说人家是会员，普通客户就该等？{boss}出来也不给解释。', tags: ['排队久', '态度差'], sentiment: 'negative', containsBoss: true, containsDish: [6], sceneHint: 'weekend' },
     ],
     praiseTemplates: [
-      { title: '{boss}的{n}洗的真干净', content: '在{d}附近对比了好几家，{boss}家的{n}最实在。{dish}做得很细，{staff}连轮毂缝都擦了。性价比高，办了卡。', tags: ['推荐'], containsBoss: true, containsDish: [0] },
+      { title: '{boss}的{n}洗的真干净', content: '在{d}附近对比了好几家，{l}那家{n}最实在。{dish}做得很细，{staff}连轮毂缝都擦了。性价比高，办了卡。', tags: ['推荐'], containsBoss: true, containsDish: [0] },
       { title: '{n}做{dish}效果惊艳', content: '第一次做{dish}，{boss}全程盯着做，做完车亮得像新车。{staff}服务也不错，休息室还有咖啡。值得。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [3] },
     ],
   },
@@ -163,15 +165,17 @@ const TEMPLATES: Record<string, IndustryTemplate> = {
     staff: ['私教', '前台', '会籍顾问'],
     action: '锻炼',
     customerWords: ['健身小白', '撸铁达人', '瑜伽妹子', '减脂党'],
+    landmarks: ['写字楼顶层', '商场5楼', '小区会所', '地铁口旁', '体育馆隔壁', '商业中心B1'],
+    peakScenes: ['下班高峰', '周末上午', '晚上七点', '午休时间', '节后减肥潮'],
     complaintTemplates: [
-      { title: '{n}私教疯狂推销', content: '去{n}办卡，{staff}全程推{dish}，我明确拒绝还一直跟着。{boss}过来又推一遍，锻炼的心情都没了。', tags: ['态度差'], sentiment: 'negative', containsBoss: true, containsDish: [0] },
+      { title: '{n}私教疯狂推销', content: '{p}去{n}办卡，在{l}那栋楼，{staff}全程推{dish}，我明确拒绝还一直跟着。{boss}过来又推一遍，锻炼的心情都没了。', tags: ['态度差'], sentiment: 'negative', containsBoss: true, containsDish: [0], sceneHint: 'evening' },
       { title: '{n}卫生堪忧器材脏', content: '{n}的器材上全是汗渍，消毒液见底了没人补。更衣室地上到处湿毛巾和头发，垃圾桶都溢出来了。交年卡的钱就这环境？', tags: ['环境差', '卫生问题'], sentiment: 'negative', containsBoss: false, containsDish: [5] },
-      { title: '{n}高峰时段{dish}抢不到', content: '晚上7点去{n}，{dish}区全满，排队等了40分钟。{staff}说高峰都这样，但这个{staff}人数明显不够啊。', tags: ['排队久'], sentiment: 'negative', containsBoss: false, containsDish: [4] },
+      { title: '{n}高峰时段{dish}抢不到', content: '{p}去{n}，{dish}区全满，排队等了40分钟。{staff}说高峰都这样，但这个{staff}人数明显不够啊。', tags: ['排队久'], sentiment: 'negative', containsBoss: false, containsDish: [4], sceneHint: 'evening' },
       { title: '{n}年卡说涨价就涨价', content: '之前办的{dish}是2880，续费突然变成4880，说加了{dish}但我根本用不上。{boss}说爱续不续，被恶心到了。', tags: ['价格贵', '差评'], sentiment: 'negative', containsBoss: true, containsDish: [1, 6] },
     ],
     praiseTemplates: [
       { title: '{boss}的{dish}真的专业', content: '在{n}上{boss}的{dish}，一个月体脂降了5个点！全程不推销，动作纠正特别到位。{staff}也很nice，器械一直有人擦。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [0] },
-      { title: '{n}的{dish}课太好玩了', content: '每周都来上{dish}，{staff}很会带动气氛，{boss}偶尔也来上课。环境不错，器械维护的很好。', tags: ['推荐'], containsBoss: true, containsDish: [2] },
+      { title: '{n}的{dish}课太好玩了', content: '每周都来上{dish}，{staff}很会带动气氛，{boss}偶尔也来上课。环境不错，器械维护的很好。就在{l}，交通方便。', tags: ['推荐'], containsBoss: true, containsDish: [2] },
     ],
   },
 
@@ -180,13 +184,15 @@ const TEMPLATES: Record<string, IndustryTemplate> = {
     staff: ['点单员', '吧台小姐姐', '店员'],
     action: '做奶茶',
     customerWords: ['奶茶续命', '芋泥控', '奶盖达人', '果茶少女'],
+    landmarks: ['步行街入口', '地铁口出来', '商场负一楼', '大学城旁边', '写字楼楼下', '电影院旁边'],
+    peakScenes: ['下午三点', '下班顺路', '周末逛街', '饭后一杯', '下午茶时间'],
     complaintTemplates: [
-      { title: '周末{n}等位一小时起', content: '周末想去{n}坐坐，结果告诉我至少等一小时！队伍排到隔壁店了。里面明明有空桌不知道在等什么。管理太混乱。', tags: ['排队久'], sentiment: 'negative', containsBoss: false, containsDish: [3] },
+      { title: '周末{n}等位一小时起', content: '{p}去{n}，在{l}那家，结果告诉我至少等一小时！队伍排到隔壁店了。里面明明有空桌不知道在等什么。管理太混乱。', tags: ['排队久'], sentiment: 'negative', containsBoss: false, containsDish: [3], sceneHint: 'weekend' },
       { title: '{n}的{dish}越做越淡', content: '买了杯{dish}，感觉喝白开水一样，完全没有之前的味道。找{staff}说就是这个配方，{boss}也不管。花冤枉钱。', tags: ['差评'], sentiment: 'negative', containsBoss: true, containsDish: [0] },
       { title: '{n}一杯{dish}快40了', content: '加个奶盖加个芋圆，{n}的{dish}居然38了？我记得上个月才30。这个涨幅太夸张，而且量还少了。', tags: ['价格贵'], sentiment: 'negative', containsBoss: false, containsDish: [4] },
     ],
     praiseTemplates: [
-      { title: '{n}的{dish}真的绝', content: '在{d}附近最好喝的{dish}！{boss}人超nice，加料从来不手抖。{staff}也很快，高峰期也不用等太久。', tags: ['推荐'], containsBoss: true, containsDish: [0] },
+      { title: '{n}的{dish}真的绝', content: '在{d}附近最好喝的{dish}！就在{l}，每次路过必买。{boss}人超nice，加料从来不手抖。{staff}也很快，高峰期也不用等太久。', tags: ['推荐'], containsBoss: true, containsDish: [0] },
       { title: '{boss}记得老顾客口味！', content: '常去{n}买{dish}，{boss}居然记得我半糖少冰加珍珠。这种细节真的打动人。{staff}服务也很好。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [3] },
     ],
   },
@@ -196,13 +202,15 @@ const TEMPLATES: Record<string, IndustryTemplate> = {
     staff: ['咖啡师', '吧台小哥', '店员'],
     action: '做咖啡',
     customerWords: ['咖啡与猫', '手冲控', '拿铁爱好者', '咖啡因续命'],
+    landmarks: ['写字楼一楼', '创意园区里', '巷子里', '商场旁边', '书店里面', '美术馆楼下'],
+    peakScenes: ['早上上班', '午后提神', '周末下午', '加班续命', '下午茶时刻'],
     complaintTemplates: [
       { title: '{n}一杯{dish}要45，抢钱？', content: '新开业时去的{n}，{dish}才35，现在直接45。环境确实好，但这个价格在{d}这一片真的偏高了。', tags: ['价格贵'], sentiment: 'negative', containsBoss: false, containsDish: [0] },
-      { title: '{n}高峰排队40分钟', content: '中午去{n}买杯{dish}，前面20杯，等了40分钟。{staff}做的速度慢还一直聊天。{boss}也不帮忙。', tags: ['排队久', '态度差'], sentiment: 'negative', containsBoss: true, containsDish: [1] },
+      { title: '{n}高峰排队40分钟', content: '{p}去{n}买杯{dish}，在{l}那店，前面20杯，等了40分钟。{staff}做的速度慢还一直聊天。{boss}也不帮忙。', tags: ['排队久', '态度差'], sentiment: 'negative', containsBoss: true, containsDish: [1], sceneHint: 'workday' },
       { title: '{n}的{dish}味道像刷锅水', content: '点的{dish}，又酸又涩，完全不像上次的。{staff}说换豆子了但没提前告知。{boss}说不喜欢下次别来。', tags: ['态度差', '差评'], sentiment: 'negative', containsBoss: true, containsDish: [2] },
     ],
     praiseTemplates: [
-      { title: '{boss}的{dish}太专业了', content: '在{n}喝{boss}做的{dish}，冲煮参数都跟你讲，风味描述特别到位。{staff}也很懂豆子，环境舒服适合办公。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [0] },
+      { title: '{boss}的{dish}太专业了', content: '在{n}喝{boss}做的{dish}，冲煮参数都跟你讲，风味描述特别到位。{staff}也很懂豆子，环境舒服适合办公。店就在{l}，很方便。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [0] },
       { title: '{n}的环境和{dish}都赞', content: '工业风的装修，{dish}拉花超好看。{boss}时不时来聊天，聊了很多咖啡知识。{staff}也热情，会再来。', tags: ['推荐'], containsBoss: true, containsDish: [2] },
     ],
   },
@@ -212,14 +220,16 @@ const TEMPLATES: Record<string, IndustryTemplate> = {
     staff: ['烤串师傅', '服务员', '传菜小哥'],
     action: '烤串',
     customerWords: ['深夜觅食者', '烧烤老炮', '撸串达人', '啤酒爱好者'],
+    landmarks: ['夜市入口', '美食街尽头', '小区门口', '大学城后街', '江边夜市', '小吃街第三家'],
+    peakScenes: ['周五晚上', '周六深夜', '下班夜宵', '周末聚餐', '夏天晚上'],
     complaintTemplates: [
-      { title: '{n}的环境脏乱差', content: '昨晚去{n}吃{dish}，一进去就是油烟味，桌上油乎乎的，地上全是纸巾竹签。{staff}也不来擦，喊了半天才理。', tags: ['环境差', '卫生问题'], sentiment: 'negative', containsBoss: false, containsDish: [0] },
-      { title: '{n}等位等疯了', content: '周五晚上8点到{n}，说要等2小时，{dish}都要凉了。{boss}说要不先烤好带走，但我想吃热乎的。', tags: ['排队久'], sentiment: 'negative', containsBoss: true, containsDish: [5] },
+      { title: '{n}的环境脏乱差', content: '{p}去{n}吃{dish}，{l}那店，一进去就是油烟味，桌上油乎乎的，地上全是纸巾竹签。{staff}也不来擦，喊了半天才理。', tags: ['环境差', '卫生问题'], sentiment: 'negative', containsBoss: false, containsDish: [0], sceneHint: 'evening' },
+      { title: '{n}等位等疯了', content: '周五晚上8点到{n}，说要等2小时，{dish}都要凉了。{boss}说要不先烤好带走，但我想吃热乎的。', tags: ['排队久'], sentiment: 'negative', containsBoss: true, containsDish: [5], sceneHint: 'evening' },
       { title: '{n}的{dish}不熟', content: '吃的{dish}，里面还是红的，找{staff}说烧烤都是这样。闹肚子一晚上，{boss}也没道歉。', tags: ['差评', '卫生问题'], sentiment: 'negative', containsBoss: true, containsDish: [0] },
     ],
     praiseTemplates: [
       { title: '{boss}的{dish}真的香', content: '{n}的{boss}亲自烤的{dish}，火候刚刚好，孜然辣椒配的也好。{staff}上菜快，环境有烟火气就对了！', tags: ['推荐'], containsBoss: true, containsDish: [0] },
-      { title: '{n}的{dish}配啤酒绝了', content: '吃了{n}的{dish}和{dish}，都很入味。{boss}还给我们打折，{staff}态度很好。{d}附近最好的烧烤店！', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [0, 2, 1] },
+      { title: '{n}的{dish}配啤酒绝了', content: '吃了{n}的{dish}和{dish}，都很入味。{boss}还给我们打折，{staff}态度很好。{d}附近最好的烧烤店！就在{l}，每次夜宵必去。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [0, 2, 1] },
     ],
   },
 
@@ -228,12 +238,14 @@ const TEMPLATES: Record<string, IndustryTemplate> = {
     staff: ['寿司师傅', '服务员', '主厨'],
     action: '切鱼生',
     customerWords: ['日料资深粉', '刺身控', '寿司狂', '一人食'],
+    landmarks: ['商场三楼', '写字楼B1层', '巷子里深处', '五星级酒店旁', '步行街二楼', '商圈核心位置'],
+    peakScenes: ['周末午餐', '工作日定食', '约会晚餐', '周末下午', '闺蜜聚餐'],
     complaintTemplates: [
       { title: '{n}的{dish}定价离谱', content: '在{n}点了{dish}和{dish}，结账居然800多，问{staff}说食材都是进口的。但{d}这片同样品质的别家才500。', tags: ['价格贵'], sentiment: 'negative', containsBoss: false, containsDish: [0, 1] },
-      { title: '{n}没有一人食套餐', content: '一个人想吃{n}，但最小的套餐也是双人份。跟{boss}建议加{dish}，就嗯了一声没下文。', tags: ['差评'], sentiment: 'negative', containsBoss: true, containsDish: [6] },
+      { title: '{n}没有一人食套餐', content: '{p}一个人想吃{n}，但最小的套餐也是双人份。跟{boss}建议加{dish}，就嗯了一声没下文。', tags: ['差评'], sentiment: 'negative', containsBoss: true, containsDish: [6], sceneHint: 'lunch' },
     ],
     praiseTemplates: [
-      { title: '{boss}的{n}值得专程来', content: '{boss}的{dish}切的超厚，入口即化。{staff}推荐的{dish}很搭配。环境安静，服务细致。强烈推荐！', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [0, 5] },
+      { title: '{boss}的{n}值得专程来', content: '{boss}的{dish}切的超厚，入口即化。{staff}推荐的{dish}很搭配。环境安静，服务细致。强烈推荐！店在{l}，很好找。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [0, 5] },
       { title: '{n}的{dish}真的新鲜', content: '第三次来{n}，每次的{dish}都超赞。{boss}偶尔会出来跟顾客聊天，{staff}也记得我不吃姜。很用心的店。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [0] },
     ],
   },
@@ -243,13 +255,15 @@ const TEMPLATES: Record<string, IndustryTemplate> = {
     staff: ['老板娘', '服务员', '阿姨'],
     action: '做菜',
     customerWords: ['探店达人阿明', '私房菜爱好者', '聚餐控', '家庭客'],
+    landmarks: ['老巷子里', '小区深处', '别墅区里', '江边上', '公园旁', '弄堂第三家'],
+    peakScenes: ['周末家庭聚餐', '生日宴', '朋友小聚', '周末中午', '过节聚餐'],
     complaintTemplates: [
-      { title: '{n}地方难找还预约不上', content: '在{d}的巷子里绕了半小时才找到{n}，电话打了三天才预约到。味道还行但太折腾了，{boss}也不做个指示牌。', tags: ['排队久'], sentiment: 'negative', containsBoss: true, containsDish: [0] },
+      { title: '{n}地方难找还预约不上', content: '在{d}的巷子里绕了半小时才找到{n}，电话打了三天才预约到。味道还行但太折腾了，{boss}也不做个指示牌。就在{l}附近还是不好找。', tags: ['排队久'], sentiment: 'negative', containsBoss: true, containsDish: [0] },
       { title: '{n}的{dish}有点咸', content: '慕名来{n}吃{dish}，但真的太咸了，配了两碗米饭都hold不住。跟{staff}说了，{boss}说这就是特色。', tags: ['差评'], sentiment: 'negative', containsBoss: true, containsDish: [0] },
     ],
     praiseTemplates: [
       { title: '被{n}的{dish}圈粉', content: '朋友推荐的{n}，{dish}真的入口即化，肥而不腻。{boss}还送了份{dish}。{staff}很亲切，像家里吃饭。', tags: ['推荐'], containsBoss: true, containsDish: [0, 4] },
-      { title: '{boss}的{n}适合聚餐', content: '家庭聚餐选了{n}，{boss}推荐的菜搭配很好。{dish}、{dish}、{dish}全部光盘。环境也有格调，下次还来。', tags: ['推荐'], containsBoss: true, containsDish: [1, 0, 5] },
+      { title: '{boss}的{n}适合聚餐', content: '家庭聚餐选了{n}，{boss}推荐的菜搭配很好。{dish}、{dish}、{dish}全部光盘。环境也有格调，下次还来。{p}来的，氛围很好。', tags: ['推荐'], containsBoss: true, containsDish: [1, 0, 5], sceneHint: 'weekend' },
     ],
   },
 
@@ -258,13 +272,15 @@ const TEMPLATES: Record<string, IndustryTemplate> = {
     staff: ['前台', '包厢服务员', '麦霸小哥'],
     action: '唱歌',
     customerWords: ['麦霸集合', '唱K达人', '派对动物', '周末聚会党'],
+    landmarks: ['商场顶楼', '步行街口', '美食街楼上', '大学城旁边', '商圈中心', '电影院旁边'],
+    peakScenes: ['周五晚上', '周六下午', '周末夜场', '生日聚会', '节假日'],
     complaintTemplates: [
-      { title: '{n}周末预约不到包厢', content: '周五想订{n}的{dish}，提前三天都满了。现场等了1小时才有，期间{staff}连座位都不给安排。', tags: ['排队久'], sentiment: 'negative', containsBoss: false, containsDish: [0] },
+      { title: '{n}周末预约不到包厢', content: '{p}想订{n}的{dish}，提前三天都满了。现场等了1小时才有，期间{staff}连座位都不给安排。', tags: ['排队久'], sentiment: 'negative', containsBoss: false, containsDish: [0], sceneHint: 'weekend' },
       { title: '{n}价格翻倍了', content: '上次唱{dish}才198，这周去直接498，说换了{dish}但听着跟以前一样。{boss}还说爱唱不唱。', tags: ['价格贵', '差评'], sentiment: 'negative', containsBoss: true, containsDish: [1, 5] },
       { title: '{n}卫生太差了', content: '包厢里有异味，话筒套都是旧的，沙发靠垫上有污渍。{staff}说消过毒但根本没换。{boss}也不出面。', tags: ['卫生问题', '环境差'], sentiment: 'negative', containsBoss: true, containsDish: [5] },
     ],
     praiseTemplates: [
-      { title: '{boss}的{n}音效真的棒', content: '在{n}开了{dish}，{dish}效果超赞，{staff}服务随叫随到。{boss}还送了{dish}，下次聚会还来。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [1, 5, 2] },
+      { title: '{boss}的{n}音效真的棒', content: '在{n}开了{dish}，{dish}效果超赞，{staff}服务随叫随到。{boss}还送了{dish}，下次聚会还来。就在{l}，交通方便。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [1, 5, 2] },
     ],
   },
 
@@ -273,12 +289,14 @@ const TEMPLATES: Record<string, IndustryTemplate> = {
     staff: ['美容师', '顾问', '前台'],
     action: '做脸',
     customerWords: ['美容达人', '敏感肌女生', 'SPA爱好者', '抗衰小姐姐'],
+    landmarks: ['写字楼23层', '商场二楼', '小区底商', '公寓楼里', '商业中心B座', '美容院一条街'],
+    peakScenes: ['周末下午', '下班之后', '闺蜜约着一起', '周末放松', '午休美容'],
     complaintTemplates: [
       { title: '{n}办卡后服务差太多', content: '没办卡时{n}各种热情，办了卡预约{dish}说要等三周。{staff}做完{dish}又推销更贵的项目，我拒绝了态度就差了。找{boss}也没说法。', tags: ['态度差', '差评'], sentiment: 'negative', containsBoss: true, containsDish: [0, 1] },
       { title: '{n}的{dish}做烂了', content: '花3000做{n}的{dish}，做完脸红肿了一周。{boss}说是正常排毒，医院说过敏。要求退钱各种推脱。', tags: ['差评'], sentiment: 'negative', containsBoss: true, containsDish: [2] },
     ],
     praiseTemplates: [
-      { title: '{boss}的{n}真的专业', content: '在{n}做的{dish}，{boss}根据我肤质定制的方案，做完皮肤真的透亮。{staff}手法温柔，不推销。办了年卡。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [1] },
+      { title: '{boss}的{n}真的专业', content: '在{n}做的{dish}，{boss}根据我肤质定制的方案，做完皮肤真的透亮。{staff}手法温柔，不推销。办了年卡。店就在{l}，很方便。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [1] },
     ],
   },
 
@@ -287,10 +305,12 @@ const TEMPLATES: Record<string, IndustryTemplate> = {
     staff: ['技师', '前台', '足疗师'],
     action: '按摩',
     customerWords: ['解压星人', 'SPA控', '养生党', '白领放松'],
+    landmarks: ['酒店三楼', '街面二楼', '小区门口', '美食街旁边', '商业中心5层', '老街上'],
+    peakScenes: ['周末下午', '下班之后', '加班后放松', '周末放松一下', '节假日'],
     complaintTemplates: [
-      { title: '{n}技师还推销办卡', content: '周末去{n}做{dish}，{staff}全程在推卡，我说不需要就开始说我肩颈问题很严重不治要出大事。{boss}路过也加入了推销。', tags: ['态度差'], sentiment: 'negative', containsBoss: true, containsDish: [0] },
+      { title: '{n}技师还推销办卡', content: '{p}去{n}做{dish}，在{l}那店，{staff}全程在推卡，我说不需要就开始说我肩颈问题很严重不治要出大事。{boss}路过也加入了推销。', tags: ['态度差'], sentiment: 'negative', containsBoss: true, containsDish: [0], sceneHint: 'weekend' },
       { title: '{n}环境差毛巾脏', content: '做完{dish}发现{n}的毛巾有黄渍，问{staff}说高温消毒过了，但看着真的恶心。{boss}也不解释。', tags: ['卫生问题', '环境差'], sentiment: 'negative', containsBoss: true, containsDish: [0] },
-      { title: '{n}周末排队还加钱', content: '周日想去{n}，说周末要加20%服务费，{dish}原价198变成238。{boss}说周末{staff}加班费，就很无语。', tags: ['价格贵', '排队久'], sentiment: 'negative', containsBoss: true, containsDish: [0] },
+      { title: '{n}周末排队还加钱', content: '周日想去{n}，说周末要加20%服务费，{dish}原价198变成238。{boss}说周末{staff}加班费，就很无语。', tags: ['价格贵', '排队久'], sentiment: 'negative', containsBoss: true, containsDish: [0], sceneHint: 'weekend' },
     ],
     praiseTemplates: [
       { title: '{boss}家的{n}真的解压', content: '在{n}做的{dish}，{staff}力度刚好，全程不推销。{boss}很懂养生，还教了我几个拉伸动作。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [6] },
@@ -302,12 +322,14 @@ const TEMPLATES: Record<string, IndustryTemplate> = {
     staff: ['烘焙师', '前台小姐姐', '裱花师'],
     action: '做蛋糕',
     customerWords: ['甜品控', '榴莲狂', '生日小能手', '下午茶仙女'],
+    landmarks: ['商场负一楼', '步行街口', '小区门口', '学校旁边', '写字楼大堂', '美食街入口'],
+    peakScenes: ['下午三点', '生日前一天', '周末下午茶', '节日前', '放学路上'],
     complaintTemplates: [
       { title: '{n}订的{dish}做错图案', content: '给孩子订的生日{n}的{dish}，图案跟图片完全不一样。{boss}说裱花是手工的不可能一模一样，拒绝重做也不退款。', tags: ['差评'], sentiment: 'negative', containsBoss: true, containsDish: [3] },
-      { title: '{n}取蛋糕还要排队半小时', content: '提前三天订的{n}{dish}，说好下午3点取，去了说还没做好等半小时。{staff}也一直忙没人理。{boss}连声抱歉都没有。', tags: ['排队久', '态度差'], sentiment: 'negative', containsBoss: true, containsDish: [0] },
+      { title: '{n}取蛋糕还要排队半小时', content: '提前三天订的{n}{dish}，说好下午3点取，去了说还没做好等半小时。{staff}也一直忙没人理。{boss}连声抱歉都没有。就在{l}那家，再也不去了。', tags: ['排队久', '态度差'], sentiment: 'negative', containsBoss: true, containsDish: [0] },
     ],
     praiseTemplates: [
-      { title: '{boss}的{dish}真的好吃', content: '{n}的{dish}用料超足，榴莲肉厚厚的一层。{boss}很用心，还帮我写了祝福字。{staff}服务也很好。', tags: ['推荐'], containsBoss: true, containsDish: [0] },
+      { title: '{boss}的{dish}真的好吃', content: '{n}的{dish}用料超足，榴莲肉厚厚的一层。{boss}很用心，还帮我写了祝福字。{staff}服务也很好。店在{l}，每次路过必买。', tags: ['推荐'], containsBoss: true, containsDish: [0] },
     ],
   },
 
@@ -316,12 +338,14 @@ const TEMPLATES: Record<string, IndustryTemplate> = {
     staff: ['侍应生', '主厨', '领班'],
     action: '上菜',
     customerWords: ['约会族', '牛排控', '美食博主', '纪念日情侣'],
+    landmarks: ['商场顶楼', '江边', '老洋房里', '商圈核心位置', '艺术区里', '五星级酒店里'],
+    peakScenes: ['周末晚餐', '纪念日', '约会之夜', '周末午餐', '生日聚餐'],
     complaintTemplates: [
-      { title: '{n}的{dish}全熟了', content: '点的{n}{dish}三分熟，结果上来基本全熟。找{staff}说主厨今天新来的，{boss}只说打九折。太失望了。', tags: ['差评'], sentiment: 'negative', containsBoss: true, containsDish: [0] },
+      { title: '{n}的{dish}全熟了', content: '{p}点的{n}{dish}三分熟，结果上来基本全熟。找{staff}说主厨今天新来的，{boss}只说打九折。太失望了。', tags: ['差评'], sentiment: 'negative', containsBoss: true, containsDish: [0], sceneHint: 'evening' },
       { title: '{n}价格贵服务差', content: '两个人吃了{n}的{dish}和{dish}，结账1800。{staff}全程找不到，加水都要喊三次。{boss}也不打招呼。', tags: ['价格贵', '态度差'], sentiment: 'negative', containsBoss: true, containsDish: [3, 4] },
     ],
     praiseTemplates: [
-      { title: '{boss}的{n}做的{dish}完美', content: '在{n}找{boss}推荐的{dish}，火候刚刚好，配{dish}绝了。{staff}服务细致，{d}附近最好的约会地。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [0, 6] },
+      { title: '{boss}的{n}做的{dish}完美', content: '在{n}找{boss}推荐的{dish}，火候刚刚好，配{dish}绝了。{staff}服务细致，{d}附近最好的约会地。就在{l}，环境超棒。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [0, 6] },
     ],
   },
 }
@@ -474,6 +498,10 @@ export function generateMockData(storeInfo: StoreInfo) {
     const combinedText = title + content
     const { matched, confidence, confidenceReason } = computeMatchAndConfidence(combinedText, storeInfo, primaryService)
 
+    if (confidenceReason === '已被店长标记为误伤') {
+      continue
+    }
+
     const replies: Reply[] = [
       { id: `r${i}a`, author: tpl.customerWords[i % tpl.customerWords.length], content: `确实遇到过类似情况，太有共鸣了`, isAgree: true, hasImage: i % 3 === 0 },
       { id: `r${i}b`, author: '理性看待', content: `希望能改善，毕竟{n}是好店`.replace('{n}', storeName || '这家'), isAgree: true, hasImage: false },
@@ -516,6 +544,10 @@ export function generateMockData(storeInfo: StoreInfo) {
     const publishedAt = new Date(now.getTime() - hoursAgo * 3600000)
     const combinedText = title + content
     const { matched, confidence, confidenceReason } = computeMatchAndConfidence(combinedText, storeInfo, primaryService)
+
+    if (confidenceReason === '已被店长标记为误伤') {
+      continue
+    }
 
     posts.push({
       id: `p${postId++}`,
