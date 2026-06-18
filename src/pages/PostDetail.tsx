@@ -54,7 +54,7 @@ export default function PostDetail() {
       </header>
 
       <div className="px-4 py-4 space-y-4">
-        <div className="opacity-0 animate-fade-in-up stagger-1">
+          <div className="opacity-0 animate-fade-in-up stagger-1">
           <div className="flex items-center gap-2 mb-3 flex-wrap">
             {post.tags.map((tag) => (
               <TagBadge key={tag} tag={tag} size="md" />
@@ -75,6 +75,12 @@ export default function PostDetail() {
               })}
             </span>
           </div>
+
+          {post.confidenceReason && (
+            <div className="mb-3 text-[10px] text-warm-500 leading-relaxed bg-warm-50 rounded-lg px-2.5 py-2 border border-warm-100/50">
+              {post.confidenceReason}
+            </div>
+          )}
 
           <h2 className="font-medium text-warm-900 text-base leading-snug mb-3">
             {post.title}

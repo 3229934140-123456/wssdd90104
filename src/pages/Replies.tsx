@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Globe, Shield, Copy, Check, ChevronRight, Pencil, User,
-  ClipboardCheck, History, CheckCircle, RotateCcw, RefreshCw
+  ClipboardCheck, History, CheckCircle, RotateCcw, RefreshCw, CalendarClock, AlertTriangle
 } from 'lucide-react'
 import { useAppStore } from '@/store/useStore'
 import TagBadge from '@/components/TagBadge'
@@ -333,15 +333,26 @@ export default function Replies() {
                           ))}
                         </div>
                       </div>
-                      <div>
-                        <label className="text-[10px] text-warm-500 block mb-0.5">负责人</label>
-                        <input
-                          type="text"
-                          value={reminder.internalFix.assignee}
-                          onChange={(e) => updateInternalFix(reminder.id, { assignee: e.target.value })}
-                          placeholder="输入负责人姓名"
-                          className="w-full h-8 px-2 rounded-lg bg-white border border-warm-200 text-xs text-warm-800 placeholder:text-warm-300 focus:outline-none focus:border-amber-primary/50"
-                        />
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[10px] text-warm-500 block mb-0.5">负责人</label>
+                          <input
+                            type="text"
+                            value={reminder.internalFix.assignee}
+                            onChange={(e) => updateInternalFix(reminder.id, { assignee: e.target.value })}
+                            placeholder="输入负责人姓名"
+                            className="w-full h-8 px-2 rounded-lg bg-white border border-warm-200 text-xs text-warm-800 placeholder:text-warm-300 focus:outline-none focus:border-amber-primary/50"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-warm-500 block mb-0.5">截止时间</label>
+                          <input
+                            type="date"
+                            value={reminder.internalFix.deadline}
+                            onChange={(e) => updateInternalFix(reminder.id, { deadline: e.target.value })}
+                            className="w-full h-8 px-2 rounded-lg bg-white border border-warm-200 text-xs text-warm-800 focus:outline-none focus:border-amber-primary/50"
+                          />
+                        </div>
                       </div>
                       <div>
                         <label className="text-[10px] text-warm-500 block mb-0.5">处理结果</label>
@@ -364,12 +375,29 @@ export default function Replies() {
                       className="cursor-pointer active:scale-[0.98] transition-transform"
                       onClick={(e) => { e.stopPropagation(); setEditingFixId(reminder.id) }}
                     >
-                      {reminder.internalFix.assignee && (
-                        <div className="flex items-center gap-1 text-xs text-warm-600 mb-1">
-                          <User size={10} />
-                          负责人：{reminder.internalFix.assignee}
-                        </div>
-                      )}
+                      <div className="grid grid-cols-2 gap-2 mb-1">
+                        {reminder.internalFix.assignee ? (
+                          <div className="flex items-center gap-1 text-xs text-warm-600">
+                            <User size={10} />
+                            负责人：{reminder.internalFix.assignee}
+                          </div>
+                        ) : (
+                          <div className="text-[10px] text-warm-300">未指定负责人</div>
+                        )}
+                        {reminder.internalFix.deadline ? (() => {
+                          const today = new Date().toISOString().slice(0, 10)
+                          const isOverdue = reminder.internalFix.deadline < today && reminder.internalFix.status !== 'done'
+                          return (
+                            <div className={`flex items-center gap-1 text-xs ${isOverdue ? 'text-tag-wait' : 'text-warm-600'}`}>
+                              {isOverdue && <AlertTriangle size={10} />}
+                              <CalendarClock size={10} />
+                              {isOverdue ? '已逾期：' : '截止：'}{reminder.internalFix.deadline}
+                            </div>
+                          )
+                        })() : (
+                          <div className="text-[10px] text-warm-300">未设置截止</div>
+                        )}
+                      </div>
                       {reminder.internalFix.result && (
                         <p className="text-warm-600 text-xs mb-1 line-clamp-2">结果：{reminder.internalFix.result}</p>
                       )}

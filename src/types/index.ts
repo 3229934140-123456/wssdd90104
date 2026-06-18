@@ -25,6 +25,7 @@ export interface StoreKeywords {
   storeAliases: string[]
   bossNames: string[]
   signatureDishes: string[]
+  bannedPatterns: string[]
 }
 
 export interface StoreInfo {
@@ -59,6 +60,8 @@ export interface Post {
   sentiment: Sentiment
   matchedKeywords: KeywordMatch[]
   confidence: Confidence
+  confidenceReason: string
+  dismissed: boolean
 }
 
 export interface IssueTrend {
@@ -91,6 +94,7 @@ export interface InternalFix {
   status: FixStatus
   assignee: string
   result: string
+  deadline: string
   updatedAt: string
 }
 

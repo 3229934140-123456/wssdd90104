@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, X, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Plus, X, RefreshCw, Ban } from 'lucide-react'
 import { useAppStore } from '@/store/useStore'
 import type { StoreKeywords } from '@/types'
 
@@ -11,17 +11,20 @@ export default function Keywords() {
     storeAliases: [...(storeInfo.keywords?.storeAliases || [])],
     bossNames: [...(storeInfo.keywords?.bossNames || [])],
     signatureDishes: [...(storeInfo.keywords?.signatureDishes || [])],
+    bannedPatterns: [...(storeInfo.keywords?.bannedPatterns || [])],
   })
   const [newItem, setNewItem] = useState<Record<string, string>>({
     storeAliases: '',
     bossNames: '',
     signatureDishes: '',
+    bannedPatterns: '',
   })
 
-  const sections: { key: keyof StoreKeywords; label: string; placeholder: string }[] = [
-    { key: 'storeAliases', label: '门店别名', placeholder: '例如：那家火锅、老王那店' },
-    { key: 'bossNames', label: '老板/店长称呼', placeholder: '例如：王哥、王老板、老王' },
-    { key: 'signatureDishes', label: '招牌菜/服务词', placeholder: '例如：毛肚、鸳鸯锅、涮羊肉' },
+  const sections: { key: keyof StoreKeywords; label: string; placeholder: string; color: string; icon?: React.ReactNode }[] = [
+    { key: 'storeAliases', label: '门店别名', placeholder: '例如：那家火锅、老王那店', color: 'bg-amber-primary/10 text-amber-primary' },
+    { key: 'bossNames', label: '老板/店长称呼', placeholder: '例如：王哥、王老板、老王', color: 'bg-blue-50 text-blue-600' },
+    { key: 'signatureDishes', label: '招牌菜/服务词', placeholder: '例如：毛肚、鸳鸯锅、涮羊肉', color: 'bg-green-50 text-green-600' },
+    { key: 'bannedPatterns', label: '误伤过滤词（命中后不再提醒）', placeholder: '例如：隔壁老王、别家洗头', color: 'bg-warm-100 text-warm-600', icon: <Ban size={10} /> },
   ]
 
   const addItem = (key: keyof StoreKeywords) => {
@@ -63,22 +66,28 @@ export default function Keywords() {
 
         {sections.map((section) => (
           <div key={section.key}>
-            <h3 className="text-sm font-medium text-warm-800 mb-2">{section.label}</h3>
+            <h3 className="text-sm font-medium text-warm-800 mb-2 flex items-center gap-1">
+              {section.icon}
+              {section.label}
+            </h3>
             <div className="flex flex-wrap gap-2 mb-2">
               {keywords[section.key].map((item, idx) => (
                 <span
                   key={idx}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-amber-primary/10 text-amber-primary text-xs font-medium"
+                  className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium ${section.color}`}
                 >
                   {item}
                   <button
                     onClick={() => removeItem(section.key, idx)}
-                    className="hover:text-amber-dark transition-colors"
+                    className="hover:opacity-70 transition-opacity"
                   >
                     <X size={12} />
                   </button>
                 </span>
               ))}
+              {keywords[section.key].length === 0 && (
+                <span className="text-[10px] text-warm-300 px-2">暂无配置</span>
+              )}
             </div>
             <div className="flex gap-2">
               <input

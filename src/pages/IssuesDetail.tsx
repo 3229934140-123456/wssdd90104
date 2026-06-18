@@ -1,5 +1,6 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, TrendingUp, TrendingDown, Minus, Lightbulb, Clock, AlertCircle } from 'lucide-react'
+import { useState } from 'react'
+import { ArrowLeft, TrendingUp, TrendingDown, Minus, Lightbulb, Clock, AlertCircle, ClipboardCheck, CheckCircle } from 'lucide-react'
 import { useAppStore } from '@/store/useStore'
 import TagBadge from '@/components/TagBadge'
 import { DIMENSION_CONFIG } from '@/data/mock'
@@ -10,6 +11,9 @@ export default function IssuesDetail() {
   const getIssueById = useAppStore((s) => s.getIssueById)
   const posts = useAppStore((s) => s.posts)
   const allIssues = useAppStore((s) => s.issues)
+  const createReminderFromIssue = useAppStore((s) => s.createReminderFromIssue)
+  const reminders = useAppStore((s) => s.reminders)
+  const [created, setCreated] = useState(false)
 
   const issue = getIssueById(id || '')
   if (!issue) {
@@ -35,6 +39,7 @@ export default function IssuesDetail() {
   const dimConfig = DIMENSION_CONFIG[issue.dimension]
   const maxCount = Math.max(...issue.dailyTrend.map((d) => d.count), 1)
   const otherSameDim = allIssues.filter((i) => i.id !== issue.id && i.dimension === issue.dimension)
+  const hasReminder = reminders.some((r) => issue.postIds.includes(r.postId) && r.type === 'internal')
 
   return (
     <div className="animate-slide-in-right pb-4">
@@ -165,7 +170,30 @@ export default function IssuesDetail() {
             <Lightbulb size={14} className="text-amber-primary" />
             可执行建议
           </h3>
-          <p className="text-warm-600 text-xs leading-relaxed">{issue.suggestion}</p>
+          <p className="text-warm-600 text-xs leading-relaxed mb-3">{issue.suggestion}</p>
+          <button
+            onClick={() => {
+              if (!hasReminder && !created) {
+                createReminderFromIssue(issue.id)
+                setCreated(true)
+              }
+              navigate('/replies')
+            }}
+            className={`w-full h-10 rounded-xl flex items-center justify-center gap-1.5 text-sm font-medium transition-all active:scale-[0.97] ${
+              hasReminder || created
+                ? 'bg-tag-good/10 text-tag-good border border-tag-good/20'
+                : 'bg-amber-primary text-white shadow-sm shadow-amber-primary/30'
+            }`}
+          >
+            {hasReminder || created ? (
+              <><CheckCircle size={14} />已生成整改工单，去处理</>
+            ) : (
+              <><ClipboardCheck size={14} />生成内部整改工单</>
+            )}
+          </button>
+          <p className="text-[10px] text-warm-400 text-center mt-1.5">
+            将自动带入代表原帖、整改建议，并分配默认截止时间
+          </p>
         </div>
 
         {otherSameDim.length > 0 && (

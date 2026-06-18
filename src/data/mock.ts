@@ -61,13 +61,16 @@ interface IndustryTemplate {
   staff: string[]
   action: string
   customerWords: string[]
+  landmarks?: string[]
+  peakScenes?: string[]
   complaintTemplates: {
     title: string
     content: string
     tags: PostTag[]
     sentiment: 'positive' | 'negative' | 'neutral'
     containsBoss: boolean
-    containsDish: number[] // dishWords 索引
+    containsDish: number[]
+    sceneHint?: 'weekend' | 'evening' | 'workday' | 'lunch'
   }[]
   praiseTemplates: {
     title: string
@@ -75,6 +78,7 @@ interface IndustryTemplate {
     tags: PostTag[]
     containsBoss: boolean
     containsDish: number[]
+    sceneHint?: 'weekend' | 'evening' | 'workday' | 'lunch'
   }[]
 }
 
@@ -84,15 +88,17 @@ const TEMPLATES: Record<string, IndustryTemplate> = {
     staff: ['服务员', '加汤员', '店员'],
     action: '加汤',
     customerWords: ['火锅爱好者', '辣友', '吃货小王', '涮肉达人'],
+    landmarks: ['万达广场', '地铁口出来50米', '步行街入口', '美食街第三家', '写字楼B1层', '电影院旁边'],
+    peakScenes: ['周五晚上七点', '周六中午', '周日晚高峰', '下班高峰六点半', '节假日排队'],
     complaintTemplates: [
-      { title: '周末去{n}排了两小时', content: '上周末去{n}吃饭，下午五点到，前面47桌！等了整整两个小时。味道确实不错，但等位期间没人来倒柠檬水。建议搞个取号系统或线上预约。', tags: ['排队久'], sentiment: 'negative', containsBoss: false, containsDish: [0] },
-      { title: '{n}环境越来越差', content: '昨晚去{n}，一进去就是油烟味，地上油腻腻差点滑倒。桌椅也是脏的，喊了三次才有人来擦。卫生间简直噩梦级别。', tags: ['环境差', '卫生问题'], sentiment: 'negative', containsBoss: false, containsDish: [2] },
+      { title: '周末去{n}排了两小时', content: '上周六在{l}附近逛，七点到{n}，前面47桌！足足等了两个小时，{p}名不虚传。味道确实不错，但等位期间没人来倒柠檬水。建议搞个取号系统或线上预约。', tags: ['排队久'], sentiment: 'negative', containsBoss: false, containsDish: [0], sceneHint: 'weekend' },
+      { title: '{n}环境越来越差', content: '昨晚下班和同事去{n}，一进去就是油烟味，地上油腻腻差点滑倒。桌椅也是脏的，喊了三次才有人来擦。卫生间简直噩梦级别。', tags: ['环境差', '卫生问题'], sentiment: 'negative', containsBoss: false, containsDish: [2], sceneHint: 'evening' },
       { title: '{n}涨价也太猛了', content: '之前{n}的{dish}套餐才198，这周去直接变298？问店员说升级了食材，但吃出来一模一样。感觉变相涨价，老顾客很失望。', tags: ['价格贵'], sentiment: 'negative', containsBoss: false, containsDish: [0, 1] },
       { title: '{n}服务员态度太差', content: '找{staff}加汤等了20分钟，后来直接喊老板{boss}才有人理。结账时还算错了，多收一份{dish}的钱。体验大打折扣。', tags: ['态度差', '差评'], sentiment: 'negative', containsBoss: true, containsDish: [0] },
-      { title: '周末等位真的太久了', content: '上周末去{n}，{d}附近所有店都爆满，但这家特别夸张。排了一个半小时，期间{staff}连个取号牌都没给，我差点以为被遗忘了。', tags: ['排队久'], sentiment: 'negative', containsBoss: false, containsDish: [3] },
+      { title: '周末等位真的太久了', content: '上周末去{n}，{d}附近所有店都爆满，但这家特别夸张。排了一个半小时，期间{staff}连个取号牌都没给，我差点以为被遗忘了。', tags: ['排队久'], sentiment: 'negative', containsBoss: false, containsDish: [3], sceneHint: 'weekend' },
     ],
     praiseTemplates: [
-      { title: '{n}的{dish}太绝了！', content: '朋友推荐来的{n}，{dish}真的入口即化！{boss}人超好，亲自来推荐了当天的鲜切肉。分量足两个人吃很撑，强烈推荐！', tags: ['味道好', '推荐'], containsBoss: true, containsDish: [0] },
+      { title: '{n}的{dish}太绝了！', content: '朋友推荐来的{n}，在{l}那边位置很好找。{dish}真的入口即化！{boss}人超好，亲自来推荐了当天的鲜切肉。分量足两个人吃很撑，强烈推荐！', tags: ['味道好', '推荐'], containsBoss: true, containsDish: [0] },
       { title: '被{boss}圈粉了！', content: '第一次去{n}，{boss}人超热情！推荐的{dish}没让我失望，{staff}加汤很及时。环境虽然烟火气但挺舒服，体验感满分！', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [1] },
       { title: '{n}的{dish}确实好', content: '第三次来{n}，{dish}每次都很新鲜，辣度刚好。{staff}服务也不错，{boss}还记得我上次来过，这种老顾客感真的加分。', tags: ['味道好', '态度好'], containsBoss: true, containsDish: [0, 2] },
     ],
@@ -103,8 +109,10 @@ const TEMPLATES: Record<string, IndustryTemplate> = {
     staff: ['托尼老师', '助理小哥哥', '洗发小哥'],
     action: '洗头',
     customerWords: ['造型控', '发型达人', '烫发女生', '油头男孩'],
+    landmarks: ['小区楼下', '大学城', '商场二楼', '地铁口出来50米', '写字楼12楼', '购物中心三楼'],
+    peakScenes: ['周六下午', '周末约满', '下班之后', '周五晚上', '周末客流'],
     complaintTemplates: [
-      { title: '{n}周末预约全部满员', content: '上周六想剪头发，打{n}电话说预约全满，要排队等2小时。现场去了发现真的人挤人，{staff}都忙不过来。理发店就不能多请几个技师？', tags: ['排队久'], sentiment: 'negative', containsBoss: false, containsDish: [6] },
+      { title: '{n}周末预约全部满员', content: '上周六在{l}，想剪头发，打{n}电话说预约全满，要排队等2小时。{p}真的夸张。现场去了发现人挤人，{staff}都忙不过来。理发店就不能多请几个技师？', tags: ['排队久'], sentiment: 'negative', containsBoss: false, containsDish: [6], sceneHint: 'weekend' },
       { title: '{n}做{dish}被加价', content: '约{n}做{dish}，原本说398，做完要我付698，说加了进口药水但根本没跟我确认。{boss}还说大家都这个价，气得我差点报警。', tags: ['价格贵', '差评'], sentiment: 'negative', containsBoss: true, containsDish: [3] },
       { title: '{n}的{staff}技术太差', content: '想做{dish}结果完全剪毁了，我说的是锁骨以下，他给我剪到下巴。找{boss}理论，说免费帮我修但我已经不敢了。', tags: ['态度差', '差评'], sentiment: 'negative', containsBoss: true, containsDish: [1] },
       { title: '{n}环境真的需要整顿', content: '店里满地头发渣都不清，{action}池的毛巾看起来脏兮兮的。{staff}戴的围裙有明显污渍。虽然剪得还行，但这个卫生真的不行。', tags: ['环境差', '卫生问题'], sentiment: 'negative', containsBoss: false, containsDish: [6] },
@@ -112,7 +120,7 @@ const TEMPLATES: Record<string, IndustryTemplate> = {
     ],
     praiseTemplates: [
       { title: '{boss}真的会剪！推荐{n}', content: '找{boss}做的{dish}，效果超出预期！全程没有推销，沟通特别顺畅。{staff}手法也很专业，环境舒服。强烈推荐！', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [2] },
-      { title: '{n}的{dish}真的好', content: '终于在{d}附近找到一家靠谱的！{boss}剪发技术棒，做出来的{dish}跟图片一模一样，朋友都说好看。', tags: ['推荐'], containsBoss: true, containsDish: [0] },
+      { title: '{n}的{dish}真的好', content: '终于在{d}附近找到一家靠谱的！就在{l}旁边，{boss}剪发技术棒，做出来的{dish}跟图片一模一样，朋友都说好看。', tags: ['推荐'], containsBoss: true, containsDish: [0] },
       { title: '{boss}的{dish}做得超自然', content: '第一次做{dish}选了{n}，{boss}给我设计的款式很适合我的脸型，不是那种很假的卷。{staff}服务也好，{action}时按摩超舒服。', tags: ['态度好', '推荐'], containsBoss: true, containsDish: [3] },
     ],
   },
@@ -331,14 +339,18 @@ function computeMatchAndConfidence(
   text: string,
   storeInfo: StoreInfo,
   service: string,
-): { matched: KeywordMatch[]; confidence: Confidence } {
+): { matched: KeywordMatch[]; confidence: Confidence; confidenceReason: string } {
   const matched: KeywordMatch[] = []
   const { storeName, ownerAlias, keywords, services } = storeInfo
   const aliases = keywords?.storeAliases || []
   const bossNames = keywords?.bossNames || []
   const signatures = keywords?.signatureDishes || []
+  const banned = keywords?.bannedPatterns || []
 
   const allText = text.toLowerCase()
+  if (banned.some(b => b && allText.includes(b.toLowerCase()))) {
+    return { matched: [], confidence: 'low', confidenceReason: '已被店长标记为误伤' }
+  }
 
   if (storeName && allText.includes(storeName.toLowerCase())) {
     matched.push({ word: storeName, type: 'storeName' })
@@ -375,19 +387,59 @@ function computeMatchAndConfidence(
   }
 
   let confidence: Confidence = 'low'
+  let confidenceReason = ''
   const nonService = matched.filter(m => m.type !== 'service').length
-  if (nonService >= 2) confidence = 'high'
-  else if (nonService === 1) confidence = 'medium'
-  else if (matched.length >= 1) confidence = 'low'
-  else confidence = 'low'
+  const names = matched.filter(m => m.type === 'storeName' || m.type === 'alias').map(m => m.word)
+  const boss = matched.filter(m => m.type === 'boss').map(m => m.word)
+  const sigs = matched.filter(m => m.type === 'signature').map(m => m.word)
+  const svcs = matched.filter(m => m.type === 'service').map(m => m.word)
 
-  return { matched, confidence }
+  if (nonService >= 2) {
+    confidence = 'high'
+    const parts: string[] = []
+    if (names.length) parts.push(`命中门店名"${names.join('/')}"`)
+    if (boss.length) parts.push(`提到老板"${boss.join('/')}"`)
+    if (sigs.length) parts.push(`点了招牌"${sigs.join('/')}"`)
+    confidenceReason = parts.length ? `高可信：${parts.join('，')}，多维度交叉匹配` : '高可信：多维度匹配'
+  } else if (nonService === 1) {
+    confidence = 'medium'
+    if (names.length) confidenceReason = `中可信：提到门店名"${names[0]}"，建议查看原帖确认`
+    else if (boss.length) confidenceReason = `中可信：提到老板"${boss[0]}"，大概率是熟客讨论`
+    else if (sigs.length) confidenceReason = `中可信：点了招牌"${sigs[0]}"，通常是真实顾客`
+  } else if (svcs.length >= 1) {
+    confidence = 'low'
+    confidenceReason = `低置信度：仅命中泛服务词"${svcs.join('/')}"，可能是误伤，建议确认`
+  } else {
+    confidence = 'low'
+    confidenceReason = '低置信度：没有命中关键词'
+  }
+
+  return { matched, confidence, confidenceReason }
+}
+
+const DEFAULT_LANDMARKS = ['万达广场', '地铁口出来', '步行街入口', '美食街', '写字楼', '电影院旁边', '小区楼下', '商场二楼']
+const DEFAULT_PEAK = ['周六下午', '周末约满', '下班高峰', '周五晚上', '节假日排队', '周末客流']
+
+function withDefault<T extends object>(tpl: T & { landmarks?: string[]; peakScenes?: string[] }) {
+  return {
+    ...tpl,
+    landmarks: tpl.landmarks && tpl.landmarks.length ? tpl.landmarks : DEFAULT_LANDMARKS,
+    peakScenes: tpl.peakScenes && tpl.peakScenes.length ? tpl.peakScenes : DEFAULT_PEAK,
+  } as T & { landmarks: string[]; peakScenes: string[] }
+}
+
+function fillSceneTemplate(s: string, vars: Record<string, string>, dishes: string[], landmarks: string[], peaks: string[]): string {
+  let result = fillTemplate(s, vars, dishes)
+  result = result.replace(/\{l\}/g, () => landmarks[Math.floor(Math.random() * landmarks.length)])
+  result = result.replace(/\{p\}/g, () => peaks[Math.floor(Math.random() * peaks.length)])
+  return result
 }
 
 export function generateMockData(storeInfo: StoreInfo) {
   const { storeName, districtName, ownerAlias, services } = storeInfo
   const primaryService = services[0] || '火锅'
-  const tpl = TEMPLATES[primaryService] || TEMPLATES['火锅']
+  const baseTpl = TEMPLATES[primaryService] || TEMPLATES['火锅']
+  const tpl = withDefault(baseTpl)
   const dishes = tpl.dishWords
   const allServices = services.join(',')
 
@@ -410,19 +462,17 @@ export function generateMockData(storeInfo: StoreInfo) {
     const dishList = t.containsDish.length > 0
       ? t.containsDish.map(idx => dishes[idx % dishes.length])
       : [dishes[0]]
-    let title = fillTemplate(t.title, vars, dishes)
-    let content = fillTemplate(t.content, vars, dishes)
-    dishList.forEach((d, idx) => {
-      title = title.replace(new RegExp(`\\{dish\\}${idx === 0 ? '' : ''}`), (m, offset) => {
-        return offset < 1000 && !dishList[idx - 1] ? dishList[0] : d
-      })
+    let title = fillSceneTemplate(t.title, vars, dishes, tpl.landmarks, tpl.peakScenes)
+    let content = fillSceneTemplate(t.content, vars, dishes, tpl.landmarks, tpl.peakScenes)
+    dishList.forEach((d) => {
+      title = title.replace(/\{dish\}/, d)
       content = content.replace(/\{dish\}/, d)
     })
 
     const hoursAgo = i * 5 + 2
     const publishedAt = new Date(now.getTime() - hoursAgo * 3600000)
     const combinedText = title + content
-    const { matched, confidence } = computeMatchAndConfidence(combinedText, storeInfo, primaryService)
+    const { matched, confidence, confidenceReason } = computeMatchAndConfidence(combinedText, storeInfo, primaryService)
 
     const replies: Reply[] = [
       { id: `r${i}a`, author: tpl.customerWords[i % tpl.customerWords.length], content: `确实遇到过类似情况，太有共鸣了`, isAgree: true, hasImage: i % 3 === 0 },
@@ -444,6 +494,8 @@ export function generateMockData(storeInfo: StoreInfo) {
       sentiment: t.sentiment,
       matchedKeywords: matched,
       confidence,
+      confidenceReason,
+      dismissed: false,
     })
   }
 
@@ -453,8 +505,8 @@ export function generateMockData(storeInfo: StoreInfo) {
     const dishList = t.containsDish.length > 0
       ? t.containsDish.map(idx => dishes[idx % dishes.length])
       : [dishes[0]]
-    let title = fillTemplate(t.title, vars, dishes)
-    let content = fillTemplate(t.content, vars, dishes)
+    let title = fillSceneTemplate(t.title, vars, dishes, tpl.landmarks, tpl.peakScenes)
+    let content = fillSceneTemplate(t.content, vars, dishes, tpl.landmarks, tpl.peakScenes)
     dishList.forEach((d) => {
       title = title.replace(/\{dish\}/, d)
       content = content.replace(/\{dish\}/, d)
@@ -463,7 +515,7 @@ export function generateMockData(storeInfo: StoreInfo) {
     const hoursAgo = i * 8 + 5
     const publishedAt = new Date(now.getTime() - hoursAgo * 3600000)
     const combinedText = title + content
-    const { matched, confidence } = computeMatchAndConfidence(combinedText, storeInfo, primaryService)
+    const { matched, confidence, confidenceReason } = computeMatchAndConfidence(combinedText, storeInfo, primaryService)
 
     posts.push({
       id: `p${postId++}`,
@@ -483,6 +535,8 @@ export function generateMockData(storeInfo: StoreInfo) {
       sentiment: 'positive',
       matchedKeywords: matched,
       confidence,
+      confidenceReason,
+      dismissed: false,
     })
   }
 
@@ -641,6 +695,9 @@ export function generateMockData(storeInfo: StoreInfo) {
       draft = `非常抱歉给您带来不好的体验！我们已经对当事员工进行了批评教育，并加强了服务培训。欢迎您再次光临，我们一定会让您满意！`
     }
 
+    const daysForDeadline = hasEnv || hasBad ? 3 : 5
+    const defaultDeadline = new Date(now.getTime() + daysForDeadline * 86400000).toISOString().slice(0, 10)
+
     const newReminder: ReplyReminder = {
       id: `rm${i + 1}`,
       postId: post.id,
@@ -651,7 +708,7 @@ export function generateMockData(storeInfo: StoreInfo) {
       completed: false,
       ...(isPublic && draft ? { draft, draftHistory: [{ version: 1, text: draft, savedAt: new Date().toISOString() }] } : {}),
       ...(!isPublic && fixDirection ? { fixDirection } : {}),
-      ...(!isPublic ? { internalFix: { status: 'pending', assignee: '', result: '', updatedAt: '' } } : {}),
+      ...(!isPublic ? { internalFix: { status: 'pending', assignee: '', result: '', deadline: defaultDeadline, updatedAt: '' } } : {}),
     }
     reminders.push(newReminder)
   }

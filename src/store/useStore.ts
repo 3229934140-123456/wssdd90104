@@ -20,10 +20,13 @@ interface AppState {
   copyDraft: (reminderId: string) => void
   updateKeywords: (keywords: StoreKeywords) => void
   updateDraft: (reminderId: string, draft: string) => void
-  updateInternalFix: (reminderId: string, fix: { status?: FixStatus; assignee?: string; result?: string }) => void
+  updateInternalFix: (reminderId: string, fix: { status?: FixStatus; assignee?: string; result?: string; deadline?: string }) => void
   markReminderCompleted: (reminderId: string, completed: boolean) => void
   regenerateData: () => void
   resetReminders: () => void
+  dismissPost: (postId: string, pattern: string) => void
+  undismissPost: (postId: string) => void
+  createReminderFromIssue: (issueId: string) => ReplyReminder | null
 }
 
 const loadFromStorage = <T>(key: string, fallback: T): T => {
@@ -52,6 +55,7 @@ const defaultStoreInfo: StoreInfo = {
     storeAliases: [],
     bossNames: [],
     signatureDishes: [],
+    bannedPatterns: [],
   },
   onboardingCompleted: false,
 }
@@ -66,7 +70,10 @@ const buildMockData = (info: StoreInfo) => {
 const loadStoreInfo = (): StoreInfo => {
   const saved = loadFromStorage<StoreInfo>('store_info', defaultStoreInfo)
   if (!saved.keywords) {
-    saved.keywords = { storeAliases: [], bossNames: [], signatureDishes: [] }
+    saved.keywords = { storeAliases: [], bossNames: [], signatureDishes: [], bannedPatterns: [] }
+  }
+  if (!saved.keywords.bannedPatterns) {
+    saved.keywords.bannedPatterns = []
   }
   return saved
 }
@@ -86,7 +93,10 @@ export const useAppStore = create<AppState>((set, get) => {
     setStoreInfo: (info) => {
       const newInfo = { ...get().storeInfo, ...info }
       if (!newInfo.keywords) {
-        newInfo.keywords = { storeAliases: [], bossNames: [], signatureDishes: [] }
+        newInfo.keywords = { storeAliases: [], bossNames: [], signatureDishes: [], bannedPatterns: [] }
+      }
+      if (!newInfo.keywords.bannedPatterns) {
+        newInfo.keywords.bannedPatterns = []
       }
       saveToStorage('store_info', newInfo)
       set({ storeInfo: newInfo })
@@ -187,6 +197,55 @@ export const useAppStore = create<AppState>((set, get) => {
       localStorage.removeItem('reply_reminders_v2')
       const data = buildMockData(get().storeInfo)
       set({ reminders: data.reminders })
+    },
+
+    dismissPost: (postId, pattern) => {
+      const posts = get().posts.map((p) =>
+        p.id === postId ? { ...p, dismissed: true } : p
+      )
+      const storeInfo = { ...get().storeInfo }
+      if (!storeInfo.keywords) storeInfo.keywords = { storeAliases: [], bossNames: [], signatureDishes: [], bannedPatterns: [] }
+      if (!storeInfo.keywords.bannedPatterns) storeInfo.keywords.bannedPatterns = []
+      if (pattern && !storeInfo.keywords.bannedPatterns.includes(pattern)) {
+        storeInfo.keywords.bannedPatterns = [...storeInfo.keywords.bannedPatterns, pattern]
+      }
+      saveToStorage('store_info', storeInfo)
+      set({ posts, storeInfo })
+    },
+
+    undismissPost: (postId) => {
+      const posts = get().posts.map((p) =>
+        p.id === postId ? { ...p, dismissed: false } : p
+      )
+      set({ posts })
+    },
+
+    createReminderFromIssue: (issueId) => {
+      const issue = get().issues.find((i) => i.id === issueId)
+      if (!issue) return null
+      const firstPost = get().posts.find((p) => issue.postIds.includes(p.id))
+      if (!firstPost) return null
+      const existing = get().reminders.find((r) => r.postId === firstPost.id)
+      if (existing) return existing
+
+      const daysForDeadline = issue.urgency >= 4 ? 3 : 5
+      const defaultDeadline = new Date(Date.now() + daysForDeadline * 86400000).toISOString().slice(0, 10)
+
+      const newReminder: ReplyReminder = {
+        id: `rm_issue_${issueId}_${Date.now()}`,
+        postId: firstPost.id,
+        type: 'internal',
+        strategy: '整改',
+        riskLevel: issue.urgency >= 4 ? 'high' : issue.urgency >= 3 ? 'medium' : 'low',
+        recommendedAction: `${daysForDeadline}天内完成整改`,
+        completed: false,
+        fixDirection: issue.suggestion,
+        internalFix: { status: 'pending', assignee: '', result: '', deadline: defaultDeadline, updatedAt: '' },
+      }
+      const reminders = [...get().reminders, newReminder]
+      saveGlobalReminders(reminders)
+      set({ reminders })
+      return newReminder
     },
   }
 })

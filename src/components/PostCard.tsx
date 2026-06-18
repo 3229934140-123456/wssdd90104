@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom'
-import { MessageSquare, Building2, BookOpen, Star, Image, ChevronRight, Crosshair, ShieldAlert } from 'lucide-react'
+import { MessageSquare, Building2, BookOpen, Star, Image, ChevronRight, Crosshair, ShieldAlert, EyeOff, Check } from 'lucide-react'
 import type { Post } from '@/types'
 import TagBadge from '@/components/TagBadge'
 import { SOURCE_MAP, CONFIDENCE_CONFIG } from '@/data/mock'
+import { useAppStore } from '@/store/useStore'
+import { useState } from 'react'
 
 const sourceIcons: Record<string, React.ReactNode> = {
   tieba: <MessageSquare size={12} />,
@@ -38,7 +40,28 @@ interface PostCardProps {
 
 export default function PostCard({ post, index }: PostCardProps) {
   const navigate = useNavigate()
+  const dismissPost = useAppStore((s) => s.dismissPost)
   const confConfig = CONFIDENCE_CONFIG[post.confidence]
+  const [dismissed, setDismissed] = useState(post.dismissed)
+
+  const handleDismiss = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const pattern = post.matchedKeywords[0]?.word || post.title.slice(0, 6)
+    dismissPost(post.id, pattern)
+    setDismissed(true)
+  }
+
+  if (dismissed) {
+    return (
+      <div
+        className={`opacity-0 animate-fade-in-up stagger-${Math.min(index + 1, 6)} bg-white/40 rounded-2xl p-3 border border-dashed border-warm-200 flex items-center gap-2`}
+      >
+        <EyeOff size={14} className="text-warm-400" />
+        <span className="text-warm-400 text-xs flex-1">已标记误伤，后续类似内容将减少</span>
+        <span className="text-[10px] text-warm-400 line-through line-clamp-1">{post.title}</span>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -57,6 +80,7 @@ export default function PostCard({ post, index }: PostCardProps) {
         <span
           className="text-[9px] px-1.5 py-0.5 rounded-full font-medium flex items-center gap-0.5 ml-auto"
           style={{ color: confConfig.color, backgroundColor: confConfig.bg }}
+          title={post.confidenceReason}
         >
           {post.confidence === 'low' && <ShieldAlert size={9} />}
           {confConfig.label}
@@ -68,6 +92,12 @@ export default function PostCard({ post, index }: PostCardProps) {
           </span>
         )}
       </div>
+
+      {post.confidenceReason && (
+        <div className="mb-2 text-[10px] text-warm-500 leading-relaxed bg-warm-50/60 rounded-lg px-2 py-1.5 border border-warm-100/50">
+          {post.confidenceReason}
+        </div>
+      )}
 
       <h3 className="font-medium text-warm-900 text-sm leading-snug mb-2 line-clamp-2">
         {post.title}
@@ -83,7 +113,18 @@ export default function PostCard({ post, index }: PostCardProps) {
             <TagBadge key={tag} tag={tag} />
           ))}
         </div>
-        <ChevronRight size={16} className="text-warm-300 shrink-0" />
+        <div className="flex items-center gap-1">
+          {post.confidence === 'low' && (
+            <button
+              onClick={handleDismiss}
+              className="flex items-center gap-0.5 text-[10px] px-2 py-0.5 rounded-full border border-warm-200 text-warm-500 hover:bg-warm-50 active:scale-95 transition-all"
+            >
+              <EyeOff size={10} />
+              误伤
+            </button>
+          )}
+          <ChevronRight size={16} className="text-warm-300 shrink-0" />
+        </div>
       </div>
 
       {post.matchedKeywords.length > 0 && (
