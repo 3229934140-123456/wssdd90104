@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { MessageSquare, Layers, Reply } from 'lucide-react'
+import { MessageSquare, Layers, Reply, Settings } from 'lucide-react'
 import { useAppStore } from '@/store/useStore'
 
 const tabs = [
@@ -12,12 +12,12 @@ export default function Layout() {
   const location = useLocation()
   const storeInfo = useAppStore((s) => s.storeInfo)
 
-  const isDetailPage = location.pathname.includes('/mentions/')
+  const isDetailPage = location.pathname.includes('/mentions/') || location.pathname === '/keywords'
 
   return (
     <div className="flex flex-col h-screen max-w-app mx-auto bg-warm-100 relative overflow-hidden">
       {!isDetailPage && (
-        <header className="shrink-0 px-5 pt-safe-top pb-3 bg-gradient-to-b from-amber-50 to-warm-100">
+        <header className="shrink-0 px-5 pb-3 bg-gradient-to-b from-amber-50 to-warm-100">
           <div className="flex items-center justify-between pt-3">
             <div>
               <h1 className="font-serif text-xl font-bold text-warm-900">
@@ -27,10 +27,18 @@ export default function Layout() {
                 {storeInfo.storeName || '门店口碑速览'}
               </p>
             </div>
-            <div className="w-9 h-9 rounded-full bg-amber-primary/10 flex items-center justify-center">
-              <span className="text-amber-primary text-sm font-medium">
-                {storeInfo.ownerAlias ? storeInfo.ownerAlias[0] : '店'}
-              </span>
+            <div className="flex items-center gap-2">
+              <NavLink
+                to="/keywords"
+                className="w-9 h-9 rounded-full bg-warm-200/60 flex items-center justify-center active:scale-95 transition-transform"
+              >
+                <Settings size={16} className="text-warm-600" />
+              </NavLink>
+              <div className="w-9 h-9 rounded-full bg-amber-primary/10 flex items-center justify-center">
+                <span className="text-amber-primary text-sm font-medium">
+                  {storeInfo.ownerAlias ? storeInfo.ownerAlias[0] : '店'}
+                </span>
+              </div>
             </div>
           </div>
         </header>

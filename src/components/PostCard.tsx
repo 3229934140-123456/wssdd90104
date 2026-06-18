@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { MessageSquare, Building2, BookOpen, Star, Image, ChevronRight } from 'lucide-react'
+import { MessageSquare, Building2, BookOpen, Star, Image, ChevronRight, Crosshair } from 'lucide-react'
 import type { Post } from '@/types'
 import TagBadge from '@/components/TagBadge'
 import { SOURCE_MAP } from '@/data/mock'
@@ -67,6 +67,20 @@ export default function PostCard({ post, index }: PostCardProps) {
         </div>
         <ChevronRight size={16} className="text-warm-300 shrink-0" />
       </div>
+
+      {post.matchedKeywords.length > 0 && (
+        <div className="mt-2.5 pt-2.5 border-t border-warm-100 flex items-center gap-1.5 flex-wrap">
+          <Crosshair size={10} className="text-amber-primary shrink-0" />
+          {post.matchedKeywords.map((kw) => (
+            <span
+              key={kw}
+              className="text-[10px] px-1.5 py-0.5 rounded bg-amber-primary/8 text-amber-primary/80 font-medium"
+            >
+              {kw}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

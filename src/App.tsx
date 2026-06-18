@@ -6,6 +6,7 @@ import Mentions from '@/pages/Mentions'
 import PostDetail from '@/pages/PostDetail'
 import Issues from '@/pages/Issues'
 import Replies from '@/pages/Replies'
+import Keywords from '@/pages/Keywords'
 
 function RootRedirect() {
   const onboardingCompleted = useAppStore((s) => s.storeInfo.onboardingCompleted)
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/mentions/:id" element={<PostDetail />} />
           <Route path="/issues" element={<Issues />} />
           <Route path="/replies" element={<Replies />} />
+          <Route path="/keywords" element={<Keywords />} />
         </Route>
       </Routes>
     </Router>

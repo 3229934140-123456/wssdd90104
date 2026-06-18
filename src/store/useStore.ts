@@ -1,6 +1,6 @@
 import { create } from 'zustand'
-import type { StoreInfo, Post, IssueCluster, ReplyReminder } from '@/types'
-import { MOCK_POSTS, MOCK_ISSUES, MOCK_REMINDERS } from '@/data/mock'
+import type { StoreInfo, Post, IssueCluster, ReplyReminder, StoreKeywords, FixStatus } from '@/types'
+import { generateMockData } from '@/data/mock'
 
 interface AppState {
   storeInfo: StoreInfo
@@ -17,6 +17,10 @@ interface AppState {
   getPostById: (id: string) => Post | undefined
   getReminderByPostId: (postId: string) => ReplyReminder | undefined
   copyDraft: (reminderId: string) => void
+  updateKeywords: (keywords: StoreKeywords) => void
+  updateDraft: (reminderId: string, draft: string) => void
+  updateInternalFix: (reminderId: string, fix: { status?: FixStatus; assignee?: string; result?: string }) => void
+  regenerateData: () => void
 }
 
 const loadFromStorage = <T>(key: string, fallback: T): T => {
@@ -41,50 +45,115 @@ const defaultStoreInfo: StoreInfo = {
   districtName: '',
   ownerAlias: '',
   services: [],
+  keywords: {
+    storeAliases: [],
+    bossNames: [],
+    signatureDishes: [],
+  },
   onboardingCompleted: false,
 }
 
-export const useAppStore = create<AppState>((set, get) => ({
-  storeInfo: loadFromStorage('store_info', defaultStoreInfo),
-  posts: MOCK_POSTS,
-  issues: MOCK_ISSUES,
-  reminders: MOCK_REMINDERS,
-  activeTab: 'mentions',
-  expandedIssues: new Set<string>(),
+const buildMockData = (info: StoreInfo) => {
+  if (!info.onboardingCompleted || !info.storeName) {
+    return { posts: [], issues: [], reminders: [] }
+  }
+  return generateMockData(info)
+}
 
-  setStoreInfo: (info) => {
-    const newInfo = { ...get().storeInfo, ...info }
-    saveToStorage('store_info', newInfo)
-    set({ storeInfo: newInfo })
-  },
+const loadStoreInfo = (): StoreInfo => {
+  const saved = loadFromStorage<StoreInfo>('store_info', defaultStoreInfo)
+  if (!saved.keywords) {
+    saved.keywords = { storeAliases: [], bossNames: [], signatureDishes: [] }
+  }
+  return saved
+}
 
-  completeOnboarding: () => {
-    const newInfo = { ...get().storeInfo, onboardingCompleted: true }
-    saveToStorage('store_info', newInfo)
-    set({ storeInfo: newInfo })
-  },
+export const useAppStore = create<AppState>((set, get) => {
+  const initialStoreInfo = loadStoreInfo()
+  const initialData = buildMockData(initialStoreInfo)
 
-  setActiveTab: (tab) => set({ activeTab: tab }),
+  return {
+    storeInfo: initialStoreInfo,
+    posts: initialData.posts,
+    issues: initialData.issues,
+    reminders: initialData.reminders,
+    activeTab: 'mentions',
+    expandedIssues: new Set<string>(),
 
-  toggleIssue: (id) => {
-    const current = get().expandedIssues
-    const next = new Set(current)
-    if (next.has(id)) {
-      next.delete(id)
-    } else {
-      next.add(id)
-    }
-    set({ expandedIssues: next })
-  },
+    setStoreInfo: (info) => {
+      const newInfo = { ...get().storeInfo, ...info }
+      if (!newInfo.keywords) {
+        newInfo.keywords = { storeAliases: [], bossNames: [], signatureDishes: [] }
+      }
+      saveToStorage('store_info', newInfo)
+      set({ storeInfo: newInfo })
+    },
 
-  getPostById: (id) => get().posts.find((p) => p.id === id),
+    completeOnboarding: () => {
+      const newInfo = { ...get().storeInfo, onboardingCompleted: true }
+      saveToStorage('store_info', newInfo)
+      const data = buildMockData(newInfo)
+      set({ storeInfo: newInfo, ...data })
+    },
 
-  getReminderByPostId: (postId) => get().reminders.find((r) => r.postId === postId),
+    setActiveTab: (tab) => set({ activeTab: tab }),
 
-  copyDraft: (reminderId) => {
-    const reminder = get().reminders.find((r) => r.id === reminderId)
-    if (reminder?.draft) {
-      navigator.clipboard.writeText(reminder.draft).catch(() => {})
-    }
-  },
-}))
+    toggleIssue: (id) => {
+      const current = get().expandedIssues
+      const next = new Set(current)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      set({ expandedIssues: next })
+    },
+
+    getPostById: (id) => get().posts.find((p) => p.id === id),
+
+    getReminderByPostId: (postId) => get().reminders.find((r) => r.postId === postId),
+
+    copyDraft: (reminderId) => {
+      const reminder = get().reminders.find((r) => r.id === reminderId)
+      if (reminder?.draft) {
+        navigator.clipboard.writeText(reminder.draft).catch(() => {})
+      }
+    },
+
+    updateKeywords: (keywords) => {
+      const newInfo = { ...get().storeInfo, keywords }
+      saveToStorage('store_info', newInfo)
+      const data = buildMockData(newInfo)
+      set({ storeInfo: newInfo, ...data })
+    },
+
+    updateDraft: (reminderId, draft) => {
+      set({
+        reminders: get().reminders.map((r) =>
+          r.id === reminderId ? { ...r, draft } : r
+        ),
+      })
+    },
+
+    updateInternalFix: (reminderId, fix) => {
+      set({
+        reminders: get().reminders.map((r) => {
+          if (r.id !== reminderId || !r.internalFix) return r
+          return {
+            ...r,
+            internalFix: {
+              ...r.internalFix,
+              ...fix,
+              updatedAt: new Date().toISOString(),
+            },
+          }
+        }),
+      })
+    },
+
+    regenerateData: () => {
+      const data = buildMockData(get().storeInfo)
+      set({ ...data, expandedIssues: new Set() })
+    },
+  }
+})

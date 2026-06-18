@@ -8,11 +8,24 @@ export type ReplyStrategy = '道歉' | '解释' | '邀请体验' | '整改' | '�
 
 export type ReminderType = 'public' | 'internal'
 
+export type RiskLevel = 'high' | 'medium' | 'low'
+
+export type TrendDirection = 'up' | 'down' | 'stable'
+
+export type FixStatus = 'pending' | 'in_progress' | 'done'
+
+export interface StoreKeywords {
+  storeAliases: string[]
+  bossNames: string[]
+  signatureDishes: string[]
+}
+
 export interface StoreInfo {
   storeName: string
   districtName: string
   ownerAlias: string
   services: string[]
+  keywords: StoreKeywords
   onboardingCompleted: boolean
 }
 
@@ -37,6 +50,13 @@ export interface Post {
   replyCount: number
   replies: Reply[]
   sentiment: Sentiment
+  matchedKeywords: string[]
+}
+
+export interface IssueTrend {
+  direction: TrendDirection
+  thisWeek: number
+  lastWeek: number
 }
 
 export interface IssueCluster {
@@ -46,6 +66,15 @@ export interface IssueCluster {
   count: number
   postIds: string[]
   suggestion: string
+  trend: IssueTrend
+  urgency: number
+}
+
+export interface InternalFix {
+  status: FixStatus
+  assignee: string
+  result: string
+  updatedAt: string
 }
 
 export interface ReplyReminder {
@@ -53,6 +82,9 @@ export interface ReplyReminder {
   postId: string
   type: ReminderType
   strategy: ReplyStrategy
+  riskLevel: RiskLevel
+  recommendedAction: string
   draft?: string
   fixDirection?: string
+  internalFix?: InternalFix
 }

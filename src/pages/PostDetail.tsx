@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, MessageSquare, Building2, BookOpen, Star, Image, ThumbsUp, ThumbsDown, Copy } from 'lucide-react'
+import { ArrowLeft, MessageSquare, Building2, BookOpen, Star, Image, ThumbsUp, ThumbsDown, Crosshair } from 'lucide-react'
 import { useAppStore } from '@/store/useStore'
 import TagBadge from '@/components/TagBadge'
 import { SOURCE_MAP } from '@/data/mock'
@@ -46,7 +46,7 @@ export default function PostDetail() {
 
       <div className="px-4 py-4 space-y-4">
         <div className="opacity-0 animate-fade-in-up stagger-1">
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
             {post.tags.map((tag) => (
               <TagBadge key={tag} tag={tag} size="md" />
             ))}
@@ -64,6 +64,21 @@ export default function PostDetail() {
             {post.title}
           </h2>
         </div>
+
+        {post.matchedKeywords.length > 0 && (
+          <div className="opacity-0 animate-fade-in-up stagger-1 flex items-center gap-1.5 flex-wrap bg-amber-50/50 rounded-xl px-3 py-2 border border-amber-100/40">
+            <Crosshair size={12} className="text-amber-primary shrink-0" />
+            <span className="text-amber-700 text-xs font-medium shrink-0">匹配词：</span>
+            {post.matchedKeywords.map((kw) => (
+              <span
+                key={kw}
+                className="text-xs px-2 py-0.5 rounded-full bg-amber-primary/10 text-amber-primary font-medium"
+              >
+                {kw}
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="opacity-0 animate-fade-in-up stagger-2 bg-warm-50 rounded-2xl p-4 border border-warm-200/50">
           <div className="flex items-center gap-2 mb-2">
